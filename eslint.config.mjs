@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // supabase/.temp بيتولّد تلقائي وقت `supabase start` — سكراتش سيرفر محلي، مش كود مشروع
+    "supabase/.temp/**",
   ]),
 ]);
 

@@ -1,26 +1,84 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-bg: #FAF7FF;
+  --color-ink: #1A1033;
+  --color-primary: #2D1B69;
+  --color-surface: #FFFFFF;
+  --color-pink: #FF5D8F;
+  --color-yellow: #FFC93C;
+  --color-teal: #00C2A8;
+
+  --font-display: var(--font-cairo);
+  --font-body: var(--font-tajawal);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ثيمات: bg/ink/primary/surface بس هي اللي بتتغيّر — pink/yellow/teal ثابتة في كل الثيمات
+   عشان بتترمز بيهم أنواع المحتوى (فيديو/ملف/ملاحظة/اختبار) في رحلة الطالب، وبردو مستخدمة
+   في كل أشكال الزينة (DecorShapes) — تغييرهم هيكسر اتساق بصري الطالب اتعوّد عليه. */
+[data-theme="green"] {
+  --color-bg: #F4FAF6;
+  --color-ink: #0F2A1B;
+  --color-primary: #1E6B3A;
+  --color-surface: #FFFFFF;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme="dark"] {
+  --color-bg: #120C24;
+  --color-ink: #F2EEFA;
+  --color-primary: #756B9E;
+  --color-surface: #1D1638;
+
+  /* شارات الخطأ/المنتهي (bg-red-50 text-red-600 إلخ) بتستخدم ألوان Tailwind الجاهزة —
+     دي كمان متاحة كمتغيرات CSS حقيقية، فتجاوزها هنا بيصلّح التباين في كل مكان بيستخدمهم
+     من غير ما نلمس أي كومبوننت. */
+  --color-red-50: #3A1420;
+  --color-red-100: #4A1A28;
+  --color-red-500: #FF6B81;
+  --color-red-600: #FF8AA0;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-tajawal), sans-serif;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-cairo), sans-serif;
+}
+
+/* طباعة التقارير: مفيش تصغير عام للمقاس الأساسي (ده كان بيخلي الخط أصغر من اللازم) —
+   كل عنصر بيتحكم في مقاسه في الطباعة لوحده (كومبوننتات بنك الأسئلة/التقارير)،
+   وهنا بس بنفعّل الألوان عشان تمييز الإجابة الصح/الغلط يفضل ظاهر، ومسافات صفحة الطباعة. */
+@media print {
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  @page {
+    margin: 14mm 12mm;
+  }
+}
+
+/* العنصر المميز: أثر الهايلايتر خلف الكلمات المهمة */
+.marker {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+.marker::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  left: -4px;
+  bottom: 2px;
+  height: 0.5em;
+  background: var(--marker-color, #ffc93c);
+  z-index: -1;
+  transform: rotate(-1deg);
+  opacity: 0.55;
+  border-radius: 2px;
 }
