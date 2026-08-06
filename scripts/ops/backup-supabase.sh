@@ -19,7 +19,17 @@ FILE="$BACKUP_DIR/backup_$TIMESTAMP.sql.gz"
 
 mkdir -p "$BACKUP_DIR"
 
-pg_dump "$SUPABASE_DB_URL" --no-owner --no-privileges | gzip > "$FILE"
+# أوبونتو مبتربطش pg_dump تلقائي بأحدث نسخة متثبتة (زي ما بتعمل مع psql) — لو نسخة
+# 17 (أو أي نسخة تانية) متثبتة جنب القديمة، نفضّلها صراحة بدل ما نعتمد على PATH
+PG_DUMP_BIN="pg_dump"
+for candidate in /usr/lib/postgresql/17/bin/pg_dump /usr/lib/postgresql/*/bin/pg_dump; do
+  if [ -x "$candidate" ]; then
+    PG_DUMP_BIN="$candidate"
+    break
+  fi
+done
+
+"$PG_DUMP_BIN" "$SUPABASE_DB_URL" --no-owner --no-privileges | gzip > "$FILE"
 
 # تنضيف النسخ الأقدم من KEEP_DAYS يوم عشان القرص مايمتلئش
 find "$BACKUP_DIR" -name "backup_*.sql.gz" -mtime +"$KEEP_DAYS" -delete
