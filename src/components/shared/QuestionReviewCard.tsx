@@ -32,12 +32,27 @@ export default function QuestionReviewCard({
           </p>
         </div>
       )}
-      <div className="bg-surface rounded-2xl border-2 border-ink/10 p-5 space-y-3.5 print:rounded-lg print:border print:p-2.5 print:space-y-1.5">
+      <div
+        className={`rounded-2xl border-2 p-5 space-y-3.5 print:rounded-lg print:border print:p-2.5 print:space-y-1.5 ${
+          question.selected_option_id === null ? "bg-yellow/[0.07] border-yellow/50" : "bg-surface border-ink/10"
+        }`}
+      >
+        {question.selected_option_id === null && (
+          <div className="flex items-center gap-2.5 rounded-xl bg-yellow/25 px-4 py-2.5 print:hidden">
+            <span className="w-7 h-7 rounded-full bg-yellow flex items-center justify-center text-primary font-black text-sm shrink-0">
+              ⊘
+            </span>
+            <p className="text-sm font-bold text-primary">سبتها من غير إجابة</p>
+          </div>
+        )}
         <div className="flex items-start gap-3 print:gap-2">
           <span className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 print:w-5 print:h-5 print:text-xs">
             {index + 1}
           </span>
           <p className="flex-1 text-base font-bold leading-relaxed print:leading-snug">{question.question_text}</p>
+          {question.selected_option_id === null && (
+            <span className="hidden shrink-0 print:inline text-primary font-black text-xs">⊘</span>
+          )}
         </div>
         <div className="space-y-2 print:space-y-0 print:grid print:grid-cols-2 print:gap-x-2.5 print:gap-y-1.5">
           {question.options.map((option, optIndex) => {

@@ -2,23 +2,54 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import type { ReactNode } from "react";
 import RevealCard from "@/components/shared/RevealCard";
 import AnimatedHeading from "@/components/shared/AnimatedHeading";
 import Accordion from "@/components/shared/Accordion";
 
-const skills = [
-  { tag: "تناظر لفظي", desc: "تدرّب على العلاقات بين الكلمات لحد ما تبقى بديهية.", color: "bg-pink" },
-  { tag: "إكمال الجمل", desc: "اختار الكلمة المناسبة اللي تكمّل معنى الجملة صح.", color: "bg-yellow" },
-  { tag: "استيعاب المقروء", desc: "افهم النص، واستنتج الإجابة مش تدوّر عليها بس.", color: "bg-teal" },
-  { tag: "الخطأ السياقي", desc: "لاقي الكلمة اللي مكانها غلط في وسط الجملة.", color: "bg-primary" },
-];
-
-// عدّل الأرقام دي بالأرقام الحقيقية بعد ما تجهز المحتوى
-const stats = [
-  { number: "٣٠٠+", label: "سؤال في البنك" },
-  { number: "٦", label: "أقسام رئيسية" },
-  { number: "١٥+", label: "سنة خبرة تدريس" },
-  { number: "١٠٠٪", label: "شرح بالعربي" },
+const skills: { tag: string; desc: string; color: string; border: string; example: ReactNode }[] = [
+  {
+    tag: "تناظر لفظي",
+    desc: "تدرّب على العلاقات بين الكلمات لحد ما تبقى بديهية.",
+    color: "bg-pink",
+    border: "border-pink/25",
+    example: (
+      <p className="font-display font-bold text-ink/70">
+        سيف <span className="text-ink/30">:</span> قتال <span className="text-ink/30 mx-1">≈</span> فرشاة{" "}
+        <span className="text-ink/30">:</span> <span className="text-ink/35">؟</span>
+      </p>
+    ),
+  },
+  {
+    tag: "إكمال الجمل",
+    desc: "اختار الكلمة المناسبة اللي تكمّل معنى الجملة صح.",
+    color: "bg-yellow",
+    border: "border-yellow/30",
+    example: (
+      <p className="font-display font-bold text-ink/70">
+        ذاكر بجد، فـ <span className="inline-block w-14 border-b-2 border-dashed border-ink/30 align-middle" /> في الاختبار.
+      </p>
+    ),
+  },
+  {
+    tag: "استيعاب المقروء",
+    desc: "افهم النص، واستنتج الإجابة مش تدوّر عليها بس.",
+    color: "bg-teal",
+    border: "border-teal/25",
+    example: <p className="font-bold text-ink/70 leading-relaxed">"من ذاكر بانتظام قبل الاختبار بأسابيع، قلّت عنده نسبة القلق..."</p>,
+  },
+  {
+    tag: "الخطأ السياقي",
+    desc: "لاقي الكلمة اللي مكانها غلط في وسط الجملة.",
+    color: "bg-primary",
+    border: "border-primary/20",
+    example: (
+      <p className="font-bold text-ink/70 leading-relaxed">
+        شرب الطفل الماء لأنه كان <span className="line-through decoration-pink decoration-2 text-ink/35">جائعًا</span>{" "}
+        <span className="text-teal">عطشانًا</span>.
+      </p>
+    ),
+  },
 ];
 
 const steps = [
@@ -27,7 +58,6 @@ const steps = [
   { n: "03", title: "اختبر نفسك", desc: "حل الاختبار وشوف نتيجتك فورًا عشان تعرف مستواك الحقيقي." },
 ];
 
-// عدّل الأسئلة والإجابات دي زي ما يناسبك
 const faqs = [
   { q: "هل المنصة مجانية؟", a: "التسجيل في المنصة مجاني، وهيبقى فيه تفاصيل أكتر عن المحتوى المتاح بعد التسجيل." },
   { q: "هل الاختبارات بتديني نتيجة فورية؟", a: "أيوه، أول ما تخلّص الاختبار بتشوف نتيجتك على طول من غير استنى." },
@@ -48,59 +78,111 @@ const skillsHeadingTokens = [
 export default function HomePage() {
   return (
     <>
-      {/* ===== Hero ===== */}
-      <section className="relative mx-auto max-w-6xl px-4 pt-16 pb-24 text-center overflow-hidden">
-        <h1 className="font-display font-black text-4xl md:text-6xl leading-tight text-primary">
-          <AnimatedHeading tokens={heroTokens} mode="load" />
-          <br className="hidden md:block" />
-          <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.6 }} className="inline-block">
-            مش زي ما اتعودت
-          </motion.span>
-        </h1>
+      {/* ===== Hero: الادّعاء + نموذج سؤال حقيقي حي، مش مجرد كلام تسويقي ===== */}
+      <section className="relative mx-auto max-w-6xl px-4 pt-16 pb-20 md:pb-28 overflow-hidden">
+        <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-14 items-center">
+          <div className="text-center lg:text-right">
+            <h1 className="font-display font-black text-4xl md:text-6xl leading-tight text-primary">
+              <AnimatedHeading tokens={heroTokens} mode="load" />
+              <br className="hidden md:block" />
+              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.6 }} className="inline-block">
+                مش زي ما اتعودت
+              </motion.span>
+            </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.75 }}
-          className="mt-6 text-lg text-ink/70 max-w-2xl mx-auto"
-        >
-          بنك أسئلة، شروحات، وفيديوهات مرتبة قسم قسم — عشان يوم الاختبار تكون مستعد فعلًا.
-        </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.75 }}
+              className="mt-6 text-lg text-ink/70 max-w-xl mx-auto lg:mx-0"
+            >
+              بنك أسئلة، شروحات، وفيديوهات مرتبة قسم قسم — عشان يوم الاختبار تكون مستعد فعلًا.
+            </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-          className="mt-10 flex justify-center gap-4"
-        >
-          <Link href="/signup" className="px-8 py-3 rounded-full bg-primary text-white font-display font-bold hover:bg-pink transition-colors">
-            ابدأ التحضير مجانًا
-          </Link>
-          <Link
-            href="#skills"
-            className="px-8 py-3 rounded-full border-2 border-primary text-primary font-display font-bold hover:bg-primary hover:text-white transition-colors"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+              className="mt-10 grid sm:grid-cols-2 gap-3 max-w-md mx-auto lg:mx-0"
+            >
+              <Link
+                href="/signup"
+                className="rounded-2xl bg-primary text-white px-6 py-4 flex flex-col items-center lg:items-start gap-0.5 hover:bg-pink hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/25 transition-all"
+              >
+                <span className="text-xs font-bold text-white/70">لسه ما سجلتش؟</span>
+                <span className="font-display font-black text-lg">سجّل من هنا ←</span>
+              </Link>
+              <Link
+                href="/login"
+                className="group rounded-2xl border-2 border-primary text-primary px-6 py-4 flex flex-col items-center lg:items-start gap-0.5 hover:bg-primary hover:text-white hover:-translate-y-0.5 transition-all"
+              >
+                <span className="text-xs font-bold text-primary/60 group-hover:text-white/70 transition-colors">عندك حساب قبل كده؟</span>
+                <span className="font-display font-black text-lg">سجّل دخول ←</span>
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.0 }}
+              className="mt-4 flex justify-center lg:justify-start"
+            >
+              <Link href="#skills" className="text-sm font-bold text-ink/50 hover:text-primary transition-colors">
+                أو شوف الأقسام الأول
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.1 }}
+              className="mt-6 flex flex-wrap justify-center lg:justify-start gap-3"
+            >
+              <span className="text-sm font-bold text-ink/50 bg-ink/5 rounded-full px-4 py-1.5">٣٠٠+ سؤال في البنك</span>
+              <span className="text-sm font-bold text-ink/50 bg-ink/5 rounded-full px-4 py-1.5">١٥+ سنة خبرة تدريس</span>
+            </motion.div>
+          </div>
+
+          {/* نموذج سؤال تناظر لفظي حقيقي بيتحل قدام عينك — مش كارت إحصائيات عام */}
+          <motion.div
+            initial={{ opacity: 0, y: 30, rotate: -4 }}
+            animate={{ opacity: 1, y: 0, rotate: -2 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={{ rotate: 0 }}
+            className="relative mx-auto w-full max-w-sm"
           >
-            شوف الأقسام
-          </Link>
-        </motion.div>
-      </section>
-
-      {/* ===== شريط إحصائيات ===== */}
-      <section className="border-y-2 border-ink/10 bg-surface">
-        <div className="mx-auto max-w-6xl px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((s, i) => (
-            <RevealCard key={s.label} delay={i * 0.08}>
-              <div className="text-center">
-                <p className="font-display font-black text-3xl md:text-4xl text-primary">{s.number}</p>
-                <p className="text-sm text-ink/60 mt-1">{s.label}</p>
+            <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-pink/15 via-yellow/10 to-teal/15 -z-10" />
+            <div className="rounded-[1.75rem] border-2 border-ink/10 bg-surface p-7 shadow-xl">
+              <div className="flex items-center gap-2 mb-6">
+                <span className="w-2 h-2 rounded-full bg-pink" />
+                <p className="font-display font-bold text-xs text-ink/40">تناظر لفظي — نموذج من البنك</p>
               </div>
-            </RevealCard>
-          ))}
+
+              <div className="text-center font-display font-black text-2xl text-primary mb-3">
+                طبيب <span className="text-ink/25 mx-1">:</span> مستشفى
+              </div>
+              <div className="h-px bg-ink/10 mb-3" />
+              <div className="text-center font-display font-black text-2xl text-primary mb-2">
+                معلم <span className="text-ink/25 mx-1">:</span>{" "}
+                <motion.span
+                  className="marker inline-block"
+                  style={{ "--marker-color": "#FFC93C" } as React.CSSProperties}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 1.8 }}
+                >
+                  مدرسة
+                </motion.span>
+              </div>
+
+              <p className="text-center text-xs text-ink/40 mt-5">أسئلة من نفس شكل وصعوبة اختبار القدرات الحقيقي</p>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ===== عن الأستاذ ===== */}
-      <section className="mx-auto max-w-6xl px-4 py-20">
+      <section className="mx-auto max-w-6xl px-4 py-20 border-t-2 border-ink/10">
         <div className="grid md:grid-cols-[auto_1fr] gap-10 items-center">
           <RevealCard>
             <div className="w-40 h-40 md:w-52 md:h-52 mx-auto rounded-3xl bg-primary flex items-center justify-center rotate-3">
@@ -126,7 +208,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== الأقسام ===== */}
+      {/* ===== الأقسام — كل كارت فيه نموذج سؤال حقيقي مش وصف مجرد ===== */}
       <section id="skills" className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="font-display font-black text-3xl text-primary text-center mb-12">
           <AnimatedHeading tokens={skillsHeadingTokens} />
@@ -135,14 +217,11 @@ export default function HomePage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {skills.map((s, i) => (
             <RevealCard key={s.tag} delay={i * 0.1}>
-              <div className="rounded-2xl border-2 border-ink/10 p-6 hover:-translate-y-1 hover:shadow-lg transition-all bg-surface h-full">
-                <motion.span
-                  className={`inline-block w-3 h-3 rounded-full ${s.color} mb-4`}
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.3, ease: "easeInOut" }}
-                />
-                <h3 className="font-display font-bold text-lg mb-2">{s.tag}</h3>
-                <p className="text-sm text-ink/60 leading-relaxed">{s.desc}</p>
+              <div className={`rounded-2xl border-2 ${s.border} p-6 hover:-translate-y-1 hover:shadow-lg transition-all bg-surface h-full flex flex-col`}>
+                <span className={`inline-block w-3 h-3 rounded-full ${s.color} mb-4`} />
+                <h3 className="font-display font-bold text-lg mb-3">{s.tag}</h3>
+                <div className="rounded-xl bg-ink/[0.03] px-3 py-3 mb-3 text-sm leading-relaxed">{s.example}</div>
+                <p className="text-sm text-ink/60 leading-relaxed mt-auto">{s.desc}</p>
               </div>
             </RevealCard>
           ))}
@@ -196,15 +275,25 @@ export default function HomePage() {
         <RevealCard>
           <div className="relative rounded-3xl bg-primary text-white px-8 py-16 text-center overflow-hidden">
             <h2 className="font-display font-black text-3xl md:text-4xl mb-4">جاهز تبدأ؟</h2>
-            <p className="text-white/70 mb-8 max-w-xl mx-auto">سجّل دلوقتي وابدأ أول اختبار تجريبي في أقل من دقيقتين.</p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} className="inline-block">
-              <Link
-                href="/signup"
-                className="inline-block px-8 py-3 rounded-full bg-yellow text-primary font-display font-bold hover:bg-surface transition-colors"
-              >
-                إنشاء حساب
-              </Link>
-            </motion.div>
+            <p className="text-white/70 mb-8 max-w-xl mx-auto">اختار الطريق اللي يناسبك وابدأ أول اختبار تجريبي في أقل من دقيقتين.</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Link
+                  href="/signup"
+                  className="inline-block px-8 py-3.5 rounded-full bg-yellow text-primary font-display font-bold hover:bg-surface transition-colors"
+                >
+                  لسه ما سجلتش؟ سجّل من هنا
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Link
+                  href="/login"
+                  className="inline-block px-8 py-3.5 rounded-full border-2 border-white text-white font-display font-bold hover:bg-white hover:text-primary transition-colors"
+                >
+                  عندك حساب؟ سجّل دخول
+                </Link>
+              </motion.div>
+            </div>
           </div>
         </RevealCard>
       </section>

@@ -114,7 +114,7 @@ export default function Header() {
             </Link>
 
             <nav
-              className="hidden md:flex items-center gap-1 font-display font-bold"
+              className="hidden lg:flex items-center gap-1 font-display font-bold"
               onMouseLeave={() => setHoveredLink(null)}
             >
               {navLinks.map((link) => {
@@ -139,10 +139,10 @@ export default function Header() {
               })}
             </nav>
 
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-2 lg:gap-3">
               <ThemeToggle />
 
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden lg:flex items-center gap-1">
                 {checkingAuth ? null : user ? (
                   <>
                     {isAdmin && (
@@ -159,21 +159,24 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Link href="/login" className="px-4 py-2 font-display font-bold text-primary hover:text-pink transition-colors">
-                      تسجيل الدخول
+                    <Link
+                      href="/login"
+                      className="px-4 py-2 font-display font-bold text-primary hover:text-pink transition-colors whitespace-nowrap"
+                    >
+                      عندك حساب؟ سجّل دخول
                     </Link>
                     <Link
                       href="/signup"
-                      className="px-5 py-2.5 rounded-full bg-primary text-white font-display font-bold hover:bg-pink hover:scale-105 hover:shadow-lg hover:shadow-primary/30 transition-all"
+                      className="px-5 py-2.5 rounded-full bg-primary text-white font-display font-bold hover:bg-pink hover:scale-105 hover:shadow-lg hover:shadow-primary/30 transition-all whitespace-nowrap"
                     >
-                      ابدأ مجانًا
+                      جديد؟ سجّل من هنا
                     </Link>
                   </>
                 )}
               </div>
 
               <button
-                className="md:hidden relative w-9 h-9 flex items-center justify-center text-primary shrink-0"
+                className="lg:hidden relative w-9 h-9 flex items-center justify-center text-primary shrink-0"
                 onClick={() => setOpen((v) => !v)}
                 aria-label={open ? "قفل القائمة" : "فتح القائمة"}
                 aria-expanded={open}
@@ -205,7 +208,7 @@ export default function Header() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="md:hidden mt-3 rounded-3xl border-2 border-ink/10 bg-surface shadow-xl overflow-hidden"
+              className="lg:hidden mt-3 rounded-3xl border-2 border-ink/10 bg-surface shadow-xl overflow-hidden"
             >
               <motion.div
                 initial="closed"
@@ -251,22 +254,24 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <motion.div variants={mobileItemVariants} transition={{ duration: 0.2 }}>
+                    <motion.div variants={mobileItemVariants} transition={{ duration: 0.2 }} className="mt-2">
+                      <p className="text-sm text-ink/40 mb-1.5">عندك حساب قبل كده؟</p>
                       <Link
                         href="/login"
                         onClick={() => setOpen(false)}
-                        className="block py-3 px-4 rounded-2xl text-lg hover:bg-primary/5 hover:text-primary transition-colors"
+                        className="block py-3.5 rounded-2xl border-2 border-primary text-primary text-center text-lg hover:bg-primary/5 transition-colors"
                       >
-                        تسجيل الدخول
+                        سجّل دخول
                       </Link>
                     </motion.div>
-                    <motion.div variants={mobileItemVariants} transition={{ duration: 0.2 }} className="mt-2">
+                    <motion.div variants={mobileItemVariants} transition={{ duration: 0.2 }} className="mt-4">
+                      <p className="text-sm text-ink/40 mb-1.5">لسه ما سجلتش؟</p>
                       <Link
                         href="/signup"
                         onClick={() => setOpen(false)}
                         className="block py-3.5 rounded-2xl bg-primary text-white text-center text-lg hover:bg-pink transition-colors"
                       >
-                        ابدأ مجانًا
+                        سجّل من هنا
                       </Link>
                     </motion.div>
                   </>
