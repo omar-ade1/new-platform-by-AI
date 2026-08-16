@@ -64,8 +64,8 @@ function ChevronIcon({ open }: { open: boolean }) {
 
 function CheckBadge() {
   return (
-    <span className="shrink-0 w-5 h-5 rounded-full bg-teal text-white flex items-center justify-center">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5">
+    <span className="shrink-0 w-6 h-6 rounded-full bg-teal text-white flex items-center justify-center">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5">
         <path d="M20 6 9 17l-5-5" />
       </svg>
     </span>
@@ -102,21 +102,21 @@ function ContentItemRow({
 
   const row = (
     <div
-      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all hover:-translate-y-0.5 ${color ? "" : "hover:bg-primary/5"}`}
+      className={`flex items-center gap-3.5 px-4 py-4 rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-sm ${color ? "" : "hover:bg-primary/5"}`}
       style={color ? { background: `${color}33` } : undefined}
     >
-      <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${accent.bg} ${accent.text}`}>{icon}</span>
+      <span className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${accent.bg} ${accent.text}`}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="font-bold truncate">{item.title}</p>
+        <p className="font-bold text-base truncate">{item.title}</p>
         {meta && (
-          <p className="text-xs text-ink/40 flex items-center gap-1 mt-0.5">
+          <p className="text-sm text-ink/40 flex items-center gap-1.5 mt-0.5">
             {item.type !== "file" && <ClockIcon />}
             {meta}
           </p>
         )}
       </div>
       {item.type === "test" && score !== null && score !== undefined && (
-        <span className={`shrink-0 text-xs font-bold rounded-full px-2.5 py-1 ${tier.bg} ${tier.text}`}>{score}%</span>
+        <span className={`shrink-0 text-sm font-bold rounded-full px-3 py-1.5 ${tier.bg} ${tier.text}`}>{score}%</span>
       )}
       {done ? <CheckBadge /> : null}
     </div>
@@ -136,7 +136,7 @@ function ContentItemRow({
         <button onClick={() => setNoteOpen((v) => !v)} className="w-full text-right">
           {row}
         </button>
-        {noteOpen && <p className="px-4 pb-3 text-sm text-ink/60 leading-relaxed whitespace-pre-wrap">{item.notes.body}</p>}
+        {noteOpen && <p className="px-4 pb-4 text-base text-ink/60 leading-relaxed whitespace-pre-wrap">{item.notes.body}</p>}
       </div>
     );
   }
@@ -161,11 +161,11 @@ function UnitBlock({
 
   return (
     <div className="border-t border-ink/10 first:border-t-0">
-      <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-right">
-        <span className="font-bold">{unit.title}</span>
-        <div className="flex items-center gap-2 shrink-0">
+      <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between gap-3 px-4 py-4 text-right">
+        <span className="font-bold text-base">{unit.title}</span>
+        <div className="flex items-center gap-2.5 shrink-0">
           {total > 0 && (
-            <span className={`text-xs font-bold rounded-full px-2.5 py-1 ${done === total ? "bg-teal/15 text-teal" : "bg-ink/5 text-ink/40"}`}>
+            <span className={`text-sm font-bold rounded-full px-3 py-1.5 ${done === total ? "bg-teal/15 text-teal" : "bg-ink/5 text-ink/40"}`}>
               {done}/{total}
             </span>
           )}
@@ -183,7 +183,7 @@ function UnitBlock({
           >
             <div className="pb-2 space-y-0.5">
               {unit.content_items.length === 0 ? (
-                <p className="px-4 pb-3 text-xs text-ink/40">لسه مفيش محتوى في الوحدة دي.</p>
+                <p className="px-4 pb-3 text-sm text-ink/40">لسه مفيش محتوى في الوحدة دي.</p>
               ) : (
                 unit.content_items.map((item) => (
                   <ContentItemRow
@@ -220,39 +220,53 @@ function SectionBlock({
   const [open, setOpen] = useState(true);
   const allItems = section.units.flatMap((u) => u.content_items);
   const { done, total } = trackableCount(allItems, seen);
+  const sectionPercent = total > 0 ? Math.round((done / total) * 100) : 0;
 
   const accent = sectionAccents[index % sectionAccents.length];
 
   return (
-    <div className="bg-surface rounded-2xl border-2 border-ink/10 overflow-hidden">
-      <div className="h-1.5" style={{ background: accent }} />
-      <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-4">
-        <button onClick={() => setOpen((v) => !v)} className="w-full sm:w-auto sm:flex-1 min-w-0 text-right">
-          <p className="font-display font-bold text-primary text-lg">{section.title}</p>
-          {section.description && <p className="text-sm text-ink/50 mt-0.5">{section.description}</p>}
-        </button>
-        <Link
-          href={`/courses/${courseId}/review?section=${section.id}&title=${encodeURIComponent(section.title)}`}
-          className="shrink-0 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full px-3.5 py-2 transition-colors"
-        >
-          امتحن أسئلتك الغلط
-        </Link>
-      </div>
-      <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between gap-3 px-5 pb-4 pt-2 text-right">
-        <div className="min-w-0">
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      className="bg-surface rounded-[1.75rem] border-2 border-ink/10 overflow-hidden"
+    >
+      <div className="px-6 pt-6 pb-5" style={{ background: `linear-gradient(135deg, ${accent}1F, ${accent}05)` }}>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <button onClick={() => setOpen((v) => !v)} className="w-full sm:w-auto sm:flex-1 min-w-0 flex items-start gap-4 text-right">
+            <span
+              className="shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center font-display font-black text-lg"
+              style={{ background: `${accent}26`, color: accent }}
+            >
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="min-w-0 pt-0.5">
+              <p className="font-display font-black text-primary text-xl md:text-2xl">{section.title}</p>
+              {section.description && <p className="text-base text-ink/50 mt-1">{section.description}</p>}
+            </span>
+          </button>
+          <Link
+            href={`/courses/${courseId}/review?section=${section.id}&title=${encodeURIComponent(section.title)}`}
+            className="shrink-0 text-sm font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full px-4 py-2.5 transition-colors"
+          >
+            امتحن أسئلتك الغلط
+          </Link>
+        </div>
+
+        <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center gap-3 mt-5">
           {total > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="h-1.5 w-24 rounded-full bg-ink/10 overflow-hidden">
-                <div className="h-full rounded-full bg-teal transition-all" style={{ width: `${Math.round((done / total) * 100)}%` }} />
+            <>
+              <div className="flex-1 h-2.5 rounded-full bg-ink/10 overflow-hidden">
+                <div className="h-full rounded-full bg-teal transition-all" style={{ width: `${sectionPercent}%` }} />
               </div>
-              <span className="text-xs text-ink/40 font-bold">
+              <span className="text-sm text-ink/45 font-bold shrink-0">
                 {done}/{total}
               </span>
-            </div>
+            </>
           )}
-        </div>
-        <ChevronIcon open={open} />
-      </button>
+          <ChevronIcon open={open} />
+        </button>
+      </div>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
@@ -263,14 +277,14 @@ function SectionBlock({
             className="overflow-hidden"
           >
             {section.units.length === 0 ? (
-              <p className="px-5 pb-4 text-sm text-ink/40 border-t border-ink/10 pt-3">لسه مفيش وحدات في القسم ده.</p>
+              <p className="px-6 pb-5 text-sm text-ink/40 border-t border-ink/10 pt-4">لسه مفيش وحدات في القسم ده.</p>
             ) : (
               section.units.map((unit) => <UnitBlock key={unit.id} unit={unit} courseId={courseId} seen={seen} testScores={testScores} />)
             )}
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 
@@ -288,7 +302,7 @@ export default function CourseContentTree({
   const seen = useMemo(() => new Set(seenIds), [seenIds]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {sections.map((section, i) => (
         <SectionBlock key={section.id} section={section} courseId={courseId} seen={seen} testScores={testScores} index={i} />
       ))}
