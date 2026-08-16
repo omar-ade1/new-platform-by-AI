@@ -47,9 +47,9 @@ export default function CourseMoveItemModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-lg"
+            className="bg-surface rounded-xl p-7 w-full max-w-lg"
           >
-            <h2 className="font-display font-black text-2xl text-primary mb-2">نقل &quot;{modal.item.title}&quot;</h2>
+            <h2 className="font-display font-bold text-xl text-primary mb-2">نقل &quot;{modal.item.title}&quot;</h2>
             <p className="text-sm text-ink/50 mb-6">اختار الدورة والقسم والوحدة الجديدة اللي عايز تنقل العنصر ليها.</p>
 
             <div className="space-y-5">
@@ -59,7 +59,7 @@ export default function CourseMoveItemModal({
                   value={modal.courseId}
                   onChange={(e) => onCourseChange(e.target.value)}
                   disabled={modal.loading || modal.moving}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5"
                 >
                   {modal.courses.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -75,7 +75,7 @@ export default function CourseMoveItemModal({
                   value={modal.sectionId}
                   onChange={(e) => onSectionChange(e.target.value)}
                   disabled={modal.loading || modal.moving || modal.sections.length === 0}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5"
                 >
                   {modal.sections.length === 0 && <option value="">لا يوجد أقسام</option>}
                   {modal.sections.map((s) => (
@@ -92,7 +92,7 @@ export default function CourseMoveItemModal({
                   value={modal.unitId}
                   onChange={(e) => onUnitIdChange(e.target.value)}
                   disabled={modal.loading || modal.moving || modal.units.length === 0}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5"
                 >
                   {modal.units.length === 0 && <option value="">لا يوجد وحدات</option>}
                   {modal.units.map((u) => (
@@ -110,7 +110,7 @@ export default function CourseMoveItemModal({
                   type="button"
                   onClick={onConfirm}
                   disabled={modal.loading || modal.moving || !modal.unitId}
-                  className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
+                  className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
                 >
                   {modal.moving ? "جاري النقل..." : "نقل"}
                 </button>
@@ -118,7 +118,7 @@ export default function CourseMoveItemModal({
                   type="button"
                   onClick={onClose}
                   disabled={modal.moving}
-                  className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
+                  className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
                 >
                   إلغاء
                 </button>

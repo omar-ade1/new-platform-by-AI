@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { buildQuestionMemoDocx, MEMO_THEMES, type MemoThemeId } from "@/lib/questionMemoDocx";
 import { buildQuestionMemoHtml } from "@/lib/questionMemoHtml";
 import { parseQuestionsCsv, type ParsedQuestionRow } from "@/lib/questionsCsv";
@@ -67,14 +68,11 @@ export default function AdminToolsPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-display font-black text-3xl text-primary mb-2">أدوات عامة</h1>
-        <p className="text-ink/60 text-lg">حوّل ملف أسئلة CSV لمذكرة Word جاهزة للطباعة</p>
-      </div>
+      <AdminPageHeader title="أدوات عامة" description="حوّل ملف أسئلة CSV لمذكرة Word جاهزة للطباعة" />
 
-      <div className="rounded-2xl border-2 border-ink/10 bg-surface p-6 max-w-3xl space-y-6">
+      <div className="rounded-xl border border-ink/10 bg-surface p-6 max-w-3xl space-y-6">
         <div>
-          <h2 className="font-display font-bold text-xl mb-1">تحويل CSV إلى مذكرة Word</h2>
+          <h2 className="font-display font-bold text-lg mb-1">تحويل CSV إلى مذكرة Word</h2>
           <p className="text-ink/50 text-base">
             نفس شكل ملف استيراد الأسئلة (نص السؤال، اختيار أ/ب/ج/د، الإجابة الصح) — بيتحوّل لمذكرة منسّقة جاهزة للطباعة، بنسختين.
           </p>
@@ -87,7 +85,7 @@ export default function AdminToolsPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="مثال: مذكرة التناظر اللفظي - الجزء الأول"
-            className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+            className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
           />
         </div>
 
@@ -98,7 +96,7 @@ export default function AdminToolsPage() {
             accept=".csv,text/csv"
             disabled={parsing}
             onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-            className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors disabled:opacity-60 file:ml-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-primary file:font-bold"
+            className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors disabled:opacity-60 file:ml-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-primary file:font-bold"
           />
         </div>
 
@@ -173,14 +171,14 @@ export default function AdminToolsPage() {
           <button
             onClick={() => handleDownload(false)}
             disabled={!canGenerate || generating !== "none"}
-            className="px-6 py-3.5 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors disabled:opacity-40"
+            className="px-5 py-3 rounded-lg border border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors disabled:opacity-40"
           >
             {generating === "unsolved" ? "جاري التجهيز..." : "نزّل المذكرة (بدون حل)"}
           </button>
           <button
             onClick={() => handleDownload(true)}
             disabled={!canGenerate || generating !== "none"}
-            className="px-6 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
+            className="px-5 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
           >
             {generating === "solved" ? "جاري التجهيز..." : "نزّل المذكرة (محلولة)"}
           </button>
@@ -194,14 +192,14 @@ export default function AdminToolsPage() {
             <button
               onClick={() => handlePrintPdf(false)}
               disabled={!canGenerate}
-              className="px-6 py-3.5 rounded-full border-2 border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
+              className="px-5 py-3 rounded-lg border border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
             >
               PDF (بدون حل)
             </button>
             <button
               onClick={() => handlePrintPdf(true)}
               disabled={!canGenerate}
-              className="px-6 py-3.5 rounded-full border-2 border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
+              className="px-5 py-3 rounded-lg border border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
             >
               PDF (محلولة)
             </button>

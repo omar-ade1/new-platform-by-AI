@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import DurationPicker from "@/components/admin/DurationPicker";
 import { computeExpiresAt, defaultDurationValue } from "@/lib/enrollmentDuration";
 import { supabase } from "@/lib/supabase/client";
@@ -223,99 +224,116 @@ export default function AdminRequestsPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display font-black text-3xl text-primary mb-2">طلبات الانضمام</h1>
-          <p className="text-ink/60 text-lg">راجع طلبات الطلاب اللي عايزين ينضموا للدورات</p>
-        </div>
-        <button
-          onClick={() => {
-            setApproveDuration(defaultDurationValue);
-            setConfirmAction({ type: "approveAll" });
-          }}
-          disabled={pendingRequests.length === 0 || bulkApproving}
-          className="shrink-0 px-6 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {bulkApproving ? "جاري القبول..." : `قبول الكل${pendingRequests.length > 0 ? ` (${pendingRequests.length})` : ""}`}
-        </button>
-      </div>
+      <AdminPageHeader
+        title="طلبات الانضمام"
+        description="راجع طلبات الطلاب اللي عايزين ينضموا للدورات"
+        action={
+          <button
+            onClick={() => {
+              setApproveDuration(defaultDurationValue);
+              setConfirmAction({ type: "approveAll" });
+            }}
+            disabled={pendingRequests.length === 0 || bulkApproving}
+            className="shrink-0 px-4 py-2.5 rounded-lg bg-primary text-white font-display font-bold text-sm hover:bg-pink transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {bulkApproving ? "جاري القبول..." : `قبول الكل${pendingRequests.length > 0 ? ` (${pendingRequests.length})` : ""}`}
+          </button>
+        }
+      />
 
       {loading ? (
-        <p className="text-ink/40 text-lg">جاري التحميل...</p>
+        <p className="text-ink/40 text-base">جاري التحميل...</p>
       ) : pendingRequests.length === 0 ? (
-        <p className="text-ink/40 text-lg mb-8">مفيش طلبات قيد الانتظار دلوقتي.</p>
+        <p className="text-ink/40 text-base mb-8">مفيش طلبات قيد الانتظار دلوقتي.</p>
       ) : (
-        <div className="space-y-4 mb-8">
-          {pendingRequests.map((request) => {
-            const profile = profiles.get(request.user_id);
-            const isProcessing = processingIds.has(request.id);
-            return (
-              <div
-                key={request.id}
-                className="rounded-2xl border-2 border-ink/10 bg-surface p-6 flex flex-col lg:flex-row lg:items-center gap-5"
-              >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xl shrink-0">
-                    {profile?.full_name?.[0] || "ط"}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-display font-bold text-lg break-words">{profile?.full_name || "بدون اسم"}</p>
-                    <p className="text-ink/50 text-base" dir="ltr">
-                      {profile?.phone || "—"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-ink/40 text-sm mb-1">عايز ينضم لـ</p>
-                  <p className="font-bold text-lg break-words">{request.courses?.title || "دورة محذوفة"}</p>
-                </div>
-
-                <p className="text-ink/40 text-base shrink-0">{new Date(request.created_at).toLocaleDateString("ar-EG")}</p>
-
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <button
-                    onClick={() => {
-                      setApproveDuration(defaultDurationValue);
-                      setConfirmAction({ type: "approve", request });
-                    }}
-                    disabled={isProcessing || bulkApproving}
-                    className="px-5 py-3 rounded-full bg-teal text-white font-display font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-40"
-                  >
-                    قبول
-                  </button>
-                  <button
-                    onClick={() => setConfirmAction({ type: "reject", request })}
-                    disabled={isProcessing || bulkApproving}
-                    className="px-5 py-3 rounded-full border-2 border-red-200 text-red-500 font-bold text-base hover:bg-red-50 transition-colors disabled:opacity-40"
-                  >
-                    رفض
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div className="rounded-xl border border-ink/10 overflow-hidden mb-8">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-base">
+              <thead>
+                <tr className="bg-ink/[0.03] text-right">
+                  <th className="py-3 px-4 font-bold text-sm text-ink/50">الطالب</th>
+                  <th className="py-3 px-4 font-bold text-sm text-ink/50">عايز ينضم لـ</th>
+                  <th className="py-3 px-4 font-bold text-sm text-ink/50">التاريخ</th>
+                  <th className="py-3 px-4 font-bold text-sm text-ink/50 w-1"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingRequests.map((request) => {
+                  const profile = profiles.get(request.user_id);
+                  const isProcessing = processingIds.has(request.id);
+                  return (
+                    <tr key={request.id} className="border-t border-ink/[0.06] hover:bg-primary/[0.025] transition-colors">
+                      <td className="py-3.5 px-4 align-top">
+                        <div className="flex items-center gap-3 min-w-[160px]">
+                          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-base shrink-0">
+                            {profile?.full_name?.[0] || "ط"}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold break-words">{profile?.full_name || "بدون اسم"}</p>
+                            <p className="text-ink/40 text-sm" dir="ltr">
+                              {profile?.phone || "—"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 align-top font-bold break-words">{request.courses?.title || "دورة محذوفة"}</td>
+                      <td className="py-3.5 px-4 align-top text-ink/50 whitespace-nowrap">
+                        {new Date(request.created_at).toLocaleDateString("ar-EG")}
+                      </td>
+                      <td className="py-3.5 px-4 align-top">
+                        <div className="flex items-center gap-2 whitespace-nowrap">
+                          <button
+                            onClick={() => {
+                              setApproveDuration(defaultDurationValue);
+                              setConfirmAction({ type: "approve", request });
+                            }}
+                            disabled={isProcessing || bulkApproving}
+                            className="px-4 py-2 rounded-lg bg-teal text-white font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+                          >
+                            قبول
+                          </button>
+                          <button
+                            onClick={() => setConfirmAction({ type: "reject", request })}
+                            disabled={isProcessing || bulkApproving}
+                            className="px-4 py-2 rounded-lg border border-red-200 text-red-500 font-bold text-sm hover:bg-red-50 transition-colors disabled:opacity-40"
+                          >
+                            رفض
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {!loading && historyRequests.length > 0 && (
-        <details className="rounded-2xl border-2 border-ink/10 bg-surface p-6">
-          <summary className="font-display font-bold text-lg cursor-pointer select-none">السجل ({historyRequests.length})</summary>
-          <div className="mt-5 divide-y divide-ink/10">
-            {historyRequests.map((request) => {
-              const profile = profiles.get(request.user_id);
-              const badge = statusBadge[request.status];
-              return (
-                <div key={request.id} className="py-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                  <p className="font-bold text-base sm:w-48 break-words">{profile?.full_name || "بدون اسم"}</p>
-                  <p className="text-ink/60 text-base flex-1 break-words">{request.courses?.title || "دورة محذوفة"}</p>
-                  <span className={`inline-block w-fit text-sm font-bold px-3 py-1.5 rounded-full ${badge.className}`}>{badge.label}</span>
-                  <p className="text-ink/40 text-sm shrink-0">
-                    {request.decided_at ? new Date(request.decided_at).toLocaleDateString("ar-EG") : "—"}
-                  </p>
-                </div>
-              );
-            })}
+        <details className="rounded-xl border border-ink/10 bg-surface p-5">
+          <summary className="font-display font-bold text-base cursor-pointer select-none">السجل ({historyRequests.length})</summary>
+          <div className="mt-4 -mx-5 overflow-x-auto">
+            <table className="w-full min-w-[640px] text-base">
+              <tbody className="divide-y divide-ink/[0.06]">
+                {historyRequests.map((request) => {
+                  const profile = profiles.get(request.user_id);
+                  const badge = statusBadge[request.status];
+                  return (
+                    <tr key={request.id}>
+                      <td className="py-3 px-5 font-bold break-words whitespace-nowrap">{profile?.full_name || "بدون اسم"}</td>
+                      <td className="py-3 px-5 text-ink/60 break-words">{request.courses?.title || "دورة محذوفة"}</td>
+                      <td className="py-3 px-5">
+                        <span className={`inline-block w-fit text-sm font-bold px-3 py-1 rounded-lg ${badge.className}`}>{badge.label}</span>
+                      </td>
+                      <td className="py-3 px-5 text-ink/40 text-sm whitespace-nowrap">
+                        {request.decided_at ? new Date(request.decided_at).toLocaleDateString("ar-EG") : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </details>
       )}
@@ -336,19 +354,19 @@ export default function AdminRequestsPage() {
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-surface rounded-2xl p-8 w-full max-w-lg"
+              className="bg-surface rounded-xl p-7 w-full max-w-lg"
             >
               {(() => {
                 if (confirmAction.type === "approveAll") {
                   return (
                     <>
                       <div className="flex items-center gap-4 mb-5">
-                        <div className="w-14 h-14 rounded-2xl bg-teal/10 text-teal flex items-center justify-center shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-teal/10 text-teal flex items-center justify-center shrink-0">
                           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                             <path d="M20 6 9 17l-5-5" />
                           </svg>
                         </div>
-                        <h2 className="font-display font-black text-xl text-primary">تأكيد قبول كل الطلبات</h2>
+                        <h2 className="font-display font-bold text-lg text-primary">تأكيد قبول كل الطلبات</h2>
                       </div>
                       <p className="text-ink/60 text-base mb-7">
                         هل تريد قبول كل الطلبات المعلقة وعددها{" "}
@@ -367,12 +385,12 @@ export default function AdminRequestsPage() {
                   return (
                     <>
                       <div className="flex items-center gap-4 mb-5">
-                        <div className="w-14 h-14 rounded-2xl bg-teal/10 text-teal flex items-center justify-center shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-teal/10 text-teal flex items-center justify-center shrink-0">
                           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                             <path d="M20 6 9 17l-5-5" />
                           </svg>
                         </div>
-                        <h2 className="font-display font-black text-xl text-primary">تأكيد قبول الطلب</h2>
+                        <h2 className="font-display font-bold text-lg text-primary">تأكيد قبول الطلب</h2>
                       </div>
                       <p className="text-ink/60 text-base mb-7">
                         هل تريد قبول طلب <span className="font-bold text-ink">{studentName}</span> للانضمام لدورة{" "}
@@ -385,12 +403,12 @@ export default function AdminRequestsPage() {
                 return (
                   <>
                     <div className="flex items-center gap-4 mb-5">
-                      <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                           <path d="M18 6 6 18M6 6l12 12" />
                         </svg>
                       </div>
-                      <h2 className="font-display font-black text-xl text-primary">تأكيد رفض الطلب</h2>
+                      <h2 className="font-display font-bold text-lg text-primary">تأكيد رفض الطلب</h2>
                     </div>
                     <p className="text-ink/60 text-base mb-7">
                       هل تريد رفض طلب <span className="font-bold text-ink">{studentName}</span> للانضمام لدورة{" "}
@@ -410,7 +428,7 @@ export default function AdminRequestsPage() {
                 <button
                   onClick={handleConfirm}
                   disabled={confirmBusy}
-                  className={`flex-1 py-3.5 rounded-full text-white font-display font-bold text-base transition-colors disabled:opacity-60 ${
+                  className={`flex-1 py-3 rounded-lg text-white font-display font-bold text-base transition-colors disabled:opacity-60 ${
                     confirmAction.type === "reject" ? "bg-red-500 hover:bg-red-600" : "bg-teal hover:opacity-90"
                   }`}
                 >
@@ -425,7 +443,7 @@ export default function AdminRequestsPage() {
                 <button
                   onClick={() => setConfirmAction(null)}
                   disabled={confirmBusy}
-                  className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
+                  className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
                 >
                   تراجع
                 </button>

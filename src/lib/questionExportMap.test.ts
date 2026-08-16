@@ -40,7 +40,7 @@ describe("toMemoRows", () => {
     expect(rows.map((r) => r.rowNumber)).toEqual([1, 2]);
   });
 
-  it("falls back to the first option's letter when no option is marked correct", () => {
+  it("leaves the answer blank and marks the row unsolved when no option is marked correct", () => {
     const questions: ExportQuestion[] = [
       {
         id: "q1",
@@ -52,7 +52,9 @@ describe("toMemoRows", () => {
         ],
       },
     ];
-    expect(toMemoRows(questions)[0].correctLetter).toBe("أ");
+    const row = toMemoRows(questions)[0];
+    expect(row.correctLetter).toBe("");
+    expect(row.solved).toBe(false);
   });
 
   it("caps options at 4 (أ-د) even if more are provided", () => {

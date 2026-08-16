@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 
 function OverviewIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <rect x="3" y="3" width="8" height="8" rx="2" />
       <rect x="13" y="3" width="8" height="8" rx="2" />
       <rect x="3" y="13" width="8" height="8" rx="2" />
@@ -18,7 +18,7 @@ function OverviewIcon() {
 
 function CoursesIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 5.5c0-1 .8-1.5 2-1.5h6v16H6c-1.2 0-2 .5-2 1.5V5.5Z" />
       <path d="M20 5.5c0-1-.8-1.5-2-1.5h-6v16h6c1.2 0 2 .5 2 1.5V5.5Z" />
     </svg>
@@ -27,7 +27,7 @@ function CoursesIcon() {
 
 function StudentsIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="9" cy="8" r="3.5" />
       <path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" />
       <circle cx="17.5" cy="9" r="2.5" />
@@ -38,7 +38,7 @@ function StudentsIcon() {
 
 function RequestsIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <rect x="3" y="4" width="18" height="16" rx="2" />
       <path d="m3 7 9 6 9-6" />
     </svg>
@@ -47,7 +47,7 @@ function RequestsIcon() {
 
 function QuestionsIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="12" r="9" />
       <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.3 1-1.3 1.9" />
       <path d="M12 16.5h.01" />
@@ -57,7 +57,7 @@ function QuestionsIcon() {
 
 function ReportsIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
       <path d="M9 13.5v3M12.5 11v5.5M16 8.5v8" />
     </svg>
@@ -66,7 +66,7 @@ function ReportsIcon() {
 
 function ToolsIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 1 5.4-5.4l-2.5 2.5-2-2 2.5-2.5Z" />
     </svg>
   );
@@ -97,9 +97,9 @@ export default function AdminSidebar() {
   const counts = { pendingRequests };
 
   return (
-    <aside className="print:hidden border-l-2 border-ink/10 bg-surface p-5">
-      <p className="font-display font-black text-primary text-2xl mb-8 px-2">لوحة التحكم</p>
-      <nav className="space-y-2">
+    <aside className="print:hidden border-l border-ink/10 bg-surface p-4">
+      <p className="font-display font-bold text-primary text-base tracking-wide mb-6 px-2">لوحة التحكم</p>
+      <nav className="space-y-1">
         {navItems.map((item) => {
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
           const count = item.countKey ? counts[item.countKey] : 0;
@@ -108,15 +108,15 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 font-bold text-base transition-colors ${
-                isActive ? "bg-primary text-white" : "text-ink/70 hover:bg-primary/10"
+              className={`flex items-center gap-3 rounded-lg px-3.5 py-3 font-bold text-base transition-colors ${
+                isActive ? "bg-primary text-white" : "text-ink/60 hover:bg-primary/10 hover:text-ink"
               }`}
             >
               <Icon />
               <span className="flex-1">{item.label}</span>
               {count > 0 && (
                 <span
-                  className={`text-sm font-black rounded-full px-2.5 py-1 shrink-0 ${isActive ? "bg-white/20 text-white" : "bg-pink text-white"}`}
+                  className={`text-xs font-black rounded-full px-2.5 py-1 shrink-0 ${isActive ? "bg-white/20 text-white" : "bg-pink text-white"}`}
                 >
                   {count}
                 </span>

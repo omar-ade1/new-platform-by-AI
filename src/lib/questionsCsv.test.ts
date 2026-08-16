@@ -17,6 +17,7 @@ describe("parseQuestionsCsv", () => {
       { letter: "د", text: "خائف" },
     ]);
     expect(rows[0].correctLetter).toBe("ب");
+    expect(rows[0].solved).toBe(true);
   });
 
   it("handles a quoted field containing a comma", () => {
@@ -48,13 +49,15 @@ describe("parseQuestionsCsv", () => {
   it("flags a correct-answer letter outside أ-د", () => {
     const csv = `${HEADER}\nسؤال,حزين,فرحان,غاضب,خائف,هـ`;
     const rows = parseQuestionsCsv(csv);
-    expect(rows[0].errors).toContain('عمود "الإجابة الصح" لازم يكون أ أو ب أو ج أو د');
+    expect(rows[0].errors).toContain('عمود "الإجابة الصح" لازم يكون فاضي أو أ أو ب أو ج أو د');
   });
 
-  it("flags a missing correct-answer letter", () => {
+  it("allows a missing correct-answer letter and marks the row unsolved", () => {
     const csv = `${HEADER}\nسؤال,حزين,فرحان,غاضب,خائف,`;
     const rows = parseQuestionsCsv(csv);
-    expect(rows[0].errors).toContain('عمود "الإجابة الصح" لازم يكون أ أو ب أو ج أو د');
+    expect(rows[0].errors).toEqual([]);
+    expect(rows[0].solved).toBe(false);
+    expect(rows[0].correctLetter).toBe("");
   });
 
   it("skips fully blank rows", () => {

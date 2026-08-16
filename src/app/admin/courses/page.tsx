@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { supabase } from "@/lib/supabase/client";
 
 type Course = {
@@ -163,27 +164,27 @@ export default function AdminCoursesPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-display font-black text-3xl text-primary mb-2">الدورات</h1>
-          <p className="text-ink/60 text-lg">إضافة وتعديل وحذف الدورات المتاحة</p>
-        </div>
-        <button
-          onClick={openAddModal}
-          className="shrink-0 px-6 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors"
-        >
-          + إضافة دورة
-        </button>
-      </div>
+      <AdminPageHeader
+        title="الدورات"
+        description="إضافة وتعديل وحذف الدورات المتاحة"
+        action={
+          <button
+            onClick={openAddModal}
+            className="shrink-0 px-4 py-2.5 rounded-lg bg-primary text-white font-display font-bold text-sm hover:bg-pink transition-colors"
+          >
+            + إضافة دورة
+          </button>
+        }
+      />
 
       {loading ? (
-        <p className="text-ink/40 text-lg">جاري التحميل...</p>
+        <p className="text-ink/40 text-base">جاري التحميل...</p>
       ) : courses.length === 0 ? (
-        <p className="text-ink/40 text-lg">لسه مفيش دورات، ابدأ بإضافة واحدة.</p>
+        <p className="text-ink/40 text-base">لسه مفيش دورات، ابدأ بإضافة واحدة.</p>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {courses.map((course) => (
-            <div key={course.id} className="rounded-2xl border-2 border-ink/10 bg-surface overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={course.id} className="rounded-xl border border-ink/10 bg-surface overflow-hidden hover:shadow-md transition-shadow">
               <div className="aspect-video bg-primary/5 relative overflow-hidden">
                 {course.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -192,33 +193,33 @@ export default function AdminCoursesPage() {
                   <div className="w-full h-full flex items-center justify-center text-primary/20 font-display font-black text-2xl">الوجيز</div>
                 )}
                 {course.order_index !== null && (
-                  <span className="absolute top-3 right-3 bg-white/90 text-primary text-sm font-bold px-3 py-1.5 rounded-full">
+                  <span className="absolute top-3 right-3 bg-white/90 text-primary text-sm font-bold px-2.5 py-1 rounded-lg">
                     ترتيب {course.order_index}
                   </span>
                 )}
               </div>
 
-              <div className="p-6">
-                <h3 className="font-display font-bold text-xl text-primary mb-2 leading-snug break-words">{course.title}</h3>
-                <p className="text-ink/50 text-base mb-5 line-clamp-2 min-h-[3rem]">{course.description || "بدون وصف"}</p>
+              <div className="p-5">
+                <h3 className="font-display font-bold text-lg text-primary mb-1.5 leading-snug break-words">{course.title}</h3>
+                <p className="text-ink/50 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">{course.description || "بدون وصف"}</p>
 
                 <Link
                   href={`/admin/courses/${course.id}/content`}
-                  className="block text-center py-3 mb-3 rounded-full bg-primary/10 text-primary font-bold text-base hover:bg-primary/20 transition-colors"
+                  className="block text-center py-2.5 mb-2.5 rounded-lg bg-primary/10 text-primary font-bold text-sm hover:bg-primary/20 transition-colors"
                 >
                   إدارة المحتوى
                 </Link>
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => openEditModal(course)}
-                    className="flex-1 py-3 rounded-full border-2 border-primary/20 text-primary font-bold text-base hover:bg-primary/5 transition-colors"
+                    className="flex-1 py-2.5 rounded-lg border border-primary/20 text-primary font-bold text-sm hover:bg-primary/5 transition-colors"
                   >
                     تعديل
                   </button>
                   <button
                     onClick={() => openDeleteModal(course)}
-                    className="flex-1 py-3 rounded-full border-2 border-red-200 text-red-500 font-bold text-base hover:bg-red-50 transition-colors"
+                    className="flex-1 py-2.5 rounded-lg border border-red-200 text-red-500 font-bold text-sm hover:bg-red-50 transition-colors"
                   >
                     حذف
                   </button>
@@ -245,9 +246,9 @@ export default function AdminCoursesPage() {
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-surface rounded-2xl p-8 w-full max-w-lg"
+              className="bg-surface rounded-xl p-7 w-full max-w-lg"
             >
-              <h2 className="font-display font-black text-2xl text-primary mb-6">{editingId ? "تعديل الدورة" : "إضافة دورة جديدة"}</h2>
+              <h2 className="font-display font-bold text-xl text-primary mb-6">{editingId ? "تعديل الدورة" : "إضافة دورة جديدة"}</h2>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
@@ -257,7 +258,7 @@ export default function AdminCoursesPage() {
                     required
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                   />
                 </div>
 
@@ -267,7 +268,7 @@ export default function AdminCoursesPage() {
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     rows={3}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors resize-none"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors resize-none"
                   />
                 </div>
 
@@ -278,7 +279,7 @@ export default function AdminCoursesPage() {
                     value={form.image_url}
                     onChange={(e) => setForm({ ...form, image_url: e.target.value })}
                     placeholder="https://..."
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                   />
                 </div>
 
@@ -288,7 +289,7 @@ export default function AdminCoursesPage() {
                     type="number"
                     value={form.order_index}
                     onChange={(e) => setForm({ ...form, order_index: e.target.value })}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                   />
                   <p className="text-sm text-ink/40 mt-2">الرقم الأصغر يظهر الأول في صفحة الدورات. بيتحدد تلقائي، وممكن تغيّره لو عايز.</p>
                 </div>
@@ -297,14 +298,14 @@ export default function AdminCoursesPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
+                    className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
                   >
                     {saving ? "جاري الحفظ..." : editingId ? "حفظ التعديل" : "إضافة"}
                   </button>
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors"
+                    className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors"
                   >
                     إلغاء
                   </button>
@@ -331,15 +332,15 @@ export default function AdminCoursesPage() {
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-surface rounded-2xl p-8 w-full max-w-lg"
+              className="bg-surface rounded-xl p-7 w-full max-w-lg"
             >
               <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                     <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
                   </svg>
                 </div>
-                <h2 className="font-display font-black text-xl text-primary">تأكيد حذف الدورة</h2>
+                <h2 className="font-display font-bold text-lg text-primary">تأكيد حذف الدورة</h2>
               </div>
 
               <p className="text-ink/60 text-base mb-1">
@@ -356,7 +357,7 @@ export default function AdminCoursesPage() {
                     type="text"
                     value={confirmPhraseInput}
                     onChange={(e) => setConfirmPhraseInput(e.target.value)}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-red-400 outline-none transition-colors"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-red-400 outline-none transition-colors"
                   />
                 </div>
 
@@ -368,7 +369,7 @@ export default function AdminCoursesPage() {
                     type="text"
                     value={confirmNameInput}
                     onChange={(e) => setConfirmNameInput(e.target.value)}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-red-400 outline-none transition-colors"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-red-400 outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -377,13 +378,13 @@ export default function AdminCoursesPage() {
                 <button
                   onClick={handleConfirmDelete}
                   disabled={!canDelete || deleting}
-                  className="flex-1 py-3.5 rounded-full bg-red-500 text-white font-display font-bold text-base hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 rounded-lg bg-red-500 text-white font-display font-bold text-base hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {deleting ? "جاري الحذف..." : "احذف الدورة نهائيًا"}
                 </button>
                 <button
                   onClick={closeDeleteModal}
-                  className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors"
+                  className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors"
                 >
                   إلغاء
                 </button>

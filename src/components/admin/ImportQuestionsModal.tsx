@@ -20,21 +20,27 @@ export default function ImportQuestionsModal({
   open,
   onClose,
   onConfirm,
+  categories,
+  defaultCategoryId,
 }: {
   open: boolean;
   onClose: () => void;
-  onConfirm: (rows: ParsedQuestionRow[]) => Promise<void>;
+  onConfirm: (rows: ParsedQuestionRow[], categoryId: string) => Promise<void>;
+  categories: { id: string; title: string; depth: number }[];
+  defaultCategoryId?: string | null;
 }) {
   const [rows, setRows] = useState<ParsedQuestionRow[]>([]);
   const [fileName, setFileName] = useState("");
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [categoryId, setCategoryId] = useState(defaultCategoryId ?? "");
 
   function reset() {
     setRows([]);
     setFileName("");
     setParsing(false);
     setImporting(false);
+    setCategoryId(defaultCategoryId ?? "");
   }
 
   function handleClose() {
@@ -57,11 +63,12 @@ export default function ImportQuestionsModal({
 
   const validRows = rows.filter((r) => r.errors.length === 0);
   const invalidCount = rows.length - validRows.length;
+  const unsolvedCount = validRows.filter((r) => !r.solved).length;
 
   async function handleConfirm() {
-    if (validRows.length === 0) return;
+    if (validRows.length === 0 || !categoryId) return;
     setImporting(true);
-    await onConfirm(validRows);
+    await onConfirm(validRows, categoryId);
     setImporting(false);
     handleClose();
   }
@@ -82,26 +89,47 @@ export default function ImportQuestionsModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-3xl max-h-[85vh] overflow-y-auto"
+            className="bg-surface rounded-xl p-7 w-full max-w-3xl max-h-[85vh] overflow-y-auto"
           >
-            <h2 className="font-display font-black text-2xl text-primary mb-2">استيراد أسئلة من ملف</h2>
+            <h2 className="font-display font-bold text-xl text-primary mb-2">استيراد أسئلة من ملف</h2>
             <p className="text-ink/50 text-base mb-6">
-              ملف CSV فيه: نص السؤال، اختيار أ، اختيار ب، اختيار ج، اختيار د، الإجابة الصح (أ/ب/ج/د).{" "}
+              ملف CSV فيه: نص السؤال، اختيار أ، اختيار ب، اختيار ج، اختيار د، الإجابة الصح (أ/ب/ج/د — اختياري، ممكن تسيبه فاضي لو
+              الأسئلة لسه محتاجة مراجعة).{" "}
               <button onClick={downloadTemplate} className="text-primary font-bold hover:text-pink transition-colors">
                 حمّل نموذج فاضي
               </button>
             </p>
 
-            <label className="block">
-              <span className="block font-bold text-base mb-2">الملف *</span>
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                disabled={parsing || importing}
-                onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-                className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors disabled:opacity-60 file:ml-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-primary file:font-bold"
-              />
-            </label>
+            <div className="space-y-5">
+              <div>
+                <label className="block font-bold text-base mb-2">هيتضاف في التصنيف *</label>
+                <select
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  disabled={importing}
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors bg-surface disabled:opacity-60"
+                >
+                  <option value="">اختار تصنيف...</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {"— ".repeat(c.depth)}
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <label className="block">
+                <span className="block font-bold text-base mb-2">الملف *</span>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  disabled={parsing || importing}
+                  onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors disabled:opacity-60 file:ml-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-primary file:font-bold"
+                />
+              </label>
+            </div>
 
             {parsing && <p className="text-ink/50 text-base mt-4">جاري قراءة {fileName}...</p>}
 
@@ -109,6 +137,12 @@ export default function ImportQuestionsModal({
               <div className="mt-6 space-y-4">
                 <p className="text-base font-bold">
                   هيتضاف <span className="text-teal">{validRows.length}</span> سؤال
+                  {unsolvedCount > 0 && (
+                    <>
+                      {" "}
+                      (<span className="text-primary">{unsolvedCount}</span> منهم غير محلول، محتاج مراجعتك بعدين)
+                    </>
+                  )}
                   {invalidCount > 0 && (
                     <>
                       {" "}
@@ -121,14 +155,18 @@ export default function ImportQuestionsModal({
                   {rows.map((row) => (
                     <div
                       key={row.rowNumber}
-                      className={`rounded-2xl border-2 p-4 ${row.errors.length > 0 ? "border-pink/40 bg-pink/5" : "border-ink/10"}`}
+                      className={`rounded-2xl border-2 p-4 ${
+                        row.errors.length > 0 ? "border-pink/40 bg-pink/5" : !row.solved ? "border-yellow/50 bg-yellow/[0.07]" : "border-ink/10"
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-sm text-ink/40 font-bold shrink-0">صف {row.rowNumber}</p>
-                        {row.errors.length === 0 ? (
+                        {row.errors.length > 0 ? (
+                          <span className="text-xs font-bold text-pink bg-pink/10 rounded-full px-2.5 py-1 shrink-0">هيتجاهل</span>
+                        ) : row.solved ? (
                           <span className="text-xs font-bold text-teal bg-teal/10 rounded-full px-2.5 py-1 shrink-0">جاهز</span>
                         ) : (
-                          <span className="text-xs font-bold text-pink bg-pink/10 rounded-full px-2.5 py-1 shrink-0">هيتجاهل</span>
+                          <span className="text-xs font-bold text-primary bg-yellow/25 rounded-full px-2.5 py-1 shrink-0">غير محلول</span>
                         )}
                       </div>
                       <p className="font-bold text-base mt-1">{row.question_text || "—"}</p>
@@ -154,15 +192,15 @@ export default function ImportQuestionsModal({
             <div className="flex items-center gap-3 pt-6">
               <button
                 onClick={handleConfirm}
-                disabled={validRows.length === 0 || importing}
-                className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
+                disabled={validRows.length === 0 || !categoryId || importing}
+                className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
               >
                 {importing ? "جاري الاستيراد..." : `أضف ${validRows.length || ""} سؤال`}
               </button>
               <button
                 onClick={handleClose}
                 disabled={importing}
-                className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
+                className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
               >
                 إلغاء
               </button>

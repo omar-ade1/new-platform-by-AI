@@ -10,6 +10,7 @@ import CourseSectionModal from "@/components/admin/CourseSectionModal";
 import CourseUnitModal from "@/components/admin/CourseUnitModal";
 import CourseItemModal from "@/components/admin/CourseItemModal";
 import CourseMoveItemModal from "@/components/admin/CourseMoveItemModal";
+import CourseMoveUnitModal, { type MoveUnitModalState } from "@/components/admin/CourseMoveUnitModal";
 import { supabase } from "@/lib/supabase/client";
 import { uploadFileWithProgress } from "@/lib/uploadWithProgress";
 import { fetchQuestionsForTestIds, getTestContentItemIds, type ExportScope } from "@/lib/supabase/questionExport";
@@ -100,6 +101,14 @@ async function fetchTree(courseId: string): Promise<Section[]> {
   return sortTree((data as unknown as Section[]) ?? []);
 }
 
+// اختبار "قيد الإعداد" = فيه سؤال واحد على الأقل معندوش اختيار متعلّم إنه صح — مخفي عن الطلبة
+// لحد ما الأدمن يراجعه (نفس الـRPC المستخدم في صفحة الدورة عند الطالب).
+async function fetchUnsolvedTestIds(courseId: string): Promise<Set<string>> {
+  const { data, error } = await supabase.rpc("get_unsolved_test_ids", { p_course_id: courseId });
+  if (error) return new Set();
+  return new Set((data as string[]) ?? []);
+}
+
 const emptyItemForm = {
   title: "",
   type: "video" as ContentType,
@@ -114,6 +123,7 @@ export type ItemFormState = typeof emptyItemForm;
 
 export default function CourseContentManager({ courseId, courseTitle }: { courseId: string; courseTitle: string }) {
   const [sections, setSections] = useState<Section[]>([]);
+  const [unsolvedTestIds, setUnsolvedTestIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
@@ -180,10 +190,14 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
     moving: false,
   });
 
+  const [moveUnitModal, setMoveUnitModal] = useState<MoveUnitModalState>({ open: false, unit: null, sections: [], sectionId: "", moving: false });
+
   const [newGroupColor, setNewGroupColor] = useState("#FF5D8F");
 
   async function reload() {
-    setSections(await fetchTree(courseId));
+    const [tree, unsolved] = await Promise.all([fetchTree(courseId), fetchUnsolvedTestIds(courseId)]);
+    setSections(tree);
+    setUnsolvedTestIds(unsolved);
   }
 
   useEffect(() => {
@@ -530,6 +544,84 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
     setDeletingItem(false);
   }
 
+  async function reorderSection(section: Section, direction: "up" | "down") {
+    const index = sections.findIndex((s) => s.id === section.id);
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= sections.length) return;
+
+    const other = sections[swapIndex];
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from("sections").update({ order_index: other.order_index }).eq("id", section.id),
+      supabase.from("sections").update({ order_index: section.order_index }).eq("id", other.id),
+    ]);
+
+    if (e1 || e2) {
+      toast.error("حصل خطأ في إعادة الترتيب");
+      return;
+    }
+    reload();
+  }
+
+  async function reorderUnit(section: Section, unit: Unit, direction: "up" | "down") {
+    const units = section.units;
+    const index = units.findIndex((u) => u.id === unit.id);
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= units.length) return;
+
+    const other = units[swapIndex];
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from("units").update({ order_index: other.order_index }).eq("id", unit.id),
+      supabase.from("units").update({ order_index: unit.order_index }).eq("id", other.id),
+    ]);
+
+    if (e1 || e2) {
+      toast.error("حصل خطأ في إعادة الترتيب");
+      return;
+    }
+    reload();
+  }
+
+  // ===== نقل وحدة (بكل محتواها) لقسم تاني في نفس الدورة =====
+  function openMoveUnit(unit: Unit) {
+    setMoveUnitModal({
+      open: true,
+      unit,
+      sections: sections.map((s) => ({ id: s.id, title: s.title })),
+      sectionId: unit.section_id,
+      moving: false,
+    });
+  }
+
+  function closeMoveUnitModal() {
+    setMoveUnitModal({ open: false, unit: null, sections: [], sectionId: "", moving: false });
+  }
+
+  async function confirmMoveUnit() {
+    if (!moveUnitModal.unit || !moveUnitModal.sectionId || moveUnitModal.moving) return;
+    if (moveUnitModal.sectionId === moveUnitModal.unit.section_id) return;
+
+    setMoveUnitModal((prev) => ({ ...prev, moving: true }));
+    try {
+      const targetSection = sections.find((s) => s.id === moveUnitModal.sectionId);
+      const nextOrder = getNextOrderIndex(targetSection?.units ?? []);
+      const { error } = await supabase
+        .from("units")
+        .update({ section_id: moveUnitModal.sectionId, order_index: nextOrder })
+        .eq("id", moveUnitModal.unit.id);
+
+      if (error) {
+        toast.error("حصل خطأ في نقل الوحدة");
+        return;
+      }
+
+      toast.success("اتنقلت الوحدة بمحتواها");
+      closeMoveUnitModal();
+      reload();
+    } finally {
+      setMoveUnitModal((prev) => ({ ...prev, moving: false }));
+    }
+  }
+
   async function reorderContentItem(unit: Unit, item: ContentItem, direction: "up" | "down") {
     const items = unit.content_items;
     const index = items.findIndex((i) => i.id === item.id);
@@ -644,20 +736,20 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
     }
   }
 
-  if (loading) return <p className="text-ink/40 text-lg">جاري التحميل...</p>;
+  if (loading) return <p className="text-ink/40 text-base">جاري التحميل...</p>;
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2.5">
         <button
           onClick={openAddSection}
-          className="px-6 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors"
+          className="px-4 py-2.5 rounded-lg bg-primary text-white font-display font-bold text-sm hover:bg-pink transition-colors"
         >
           + إضافة قسم
         </button>
         <button
           onClick={() => setExportModal({ scope: { courseId }, title: courseTitle })}
-          className="px-6 py-3.5 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors"
+          className="px-4 py-2.5 rounded-lg border border-primary/20 text-primary font-display font-bold text-sm hover:bg-primary/5 transition-colors"
         >
           تصدير كل أسئلة الدورة
         </button>
@@ -666,10 +758,10 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
       {sections.length === 0 ? (
         <p className="text-ink/40 text-lg">لسه مفيش أقسام، ابدأ بإضافة واحد.</p>
       ) : (
-        sections.map((section) => {
+        sections.map((section, sectionIndex) => {
           const sectionOpen = expandedSections.has(section.id);
           return (
-            <div key={section.id} className="bg-surface rounded-2xl border-2 border-ink/10 overflow-hidden">
+            <div key={section.id} className="bg-surface rounded-xl border border-ink/10 overflow-hidden">
               <div className="flex flex-wrap items-center gap-3 px-6 py-5">
                 <button
                   onClick={() => toggleSet(setExpandedSections, section.id)}
@@ -678,7 +770,23 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
                   <p className="font-display font-bold text-primary text-xl break-words">{section.title}</p>
                   {section.description && <p className="text-base text-ink/50 mt-1 break-words">{section.description}</p>}
                 </button>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
+                  <button
+                    onClick={() => reorderSection(section, "up")}
+                    disabled={sectionIndex === 0}
+                    title="لأعلى"
+                    className="w-10 h-10 flex items-center justify-center rounded-lg border-2 border-ink/10 text-ink/40 hover:text-primary hover:border-primary/40 hover:bg-primary/5 disabled:opacity-20 transition-colors"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => reorderSection(section, "down")}
+                    disabled={sectionIndex === sections.length - 1}
+                    title="لأسفل"
+                    className="w-10 h-10 flex items-center justify-center rounded-lg border-2 border-ink/10 text-ink/40 hover:text-primary hover:border-primary/40 hover:bg-primary/5 disabled:opacity-20 transition-colors"
+                  >
+                    ↓
+                  </button>
                   <button
                     onClick={() => setExportModal({ scope: { sectionId: section.id }, title: section.title })}
                     className="px-4 py-2.5 rounded-lg border-2 border-ink/10 text-base font-bold text-primary hover:border-primary/40 hover:bg-primary/5 transition-colors"
@@ -702,10 +810,10 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
 
               {sectionOpen && (
                 <div className="border-t-2 border-ink/10 p-5 space-y-4 bg-ink/[0.015]">
-                  {section.units.map((unit) => {
+                  {section.units.map((unit, unitIndex) => {
                     const unitOpen = expandedUnits.has(unit.id);
                     return (
-                      <div key={unit.id} className="rounded-2xl border-2 border-ink/10 bg-surface">
+                      <div key={unit.id} className="rounded-xl border border-ink/10 bg-surface">
                         <div className="flex flex-wrap items-center gap-3 px-5 py-4">
                           <button
                             onClick={() => toggleSet(setExpandedUnits, unit.id)}
@@ -713,12 +821,34 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
                           >
                             {unit.title}
                           </button>
-                          <div className="flex items-center gap-1 shrink-0">
+                          <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
+                            <button
+                              onClick={() => reorderUnit(section, unit, "up")}
+                              disabled={unitIndex === 0}
+                              title="لأعلى"
+                              className="w-10 h-10 flex items-center justify-center rounded-lg border-2 border-ink/10 text-ink/40 hover:text-primary hover:border-primary/40 hover:bg-primary/5 disabled:opacity-20 transition-colors"
+                            >
+                              ↑
+                            </button>
+                            <button
+                              onClick={() => reorderUnit(section, unit, "down")}
+                              disabled={unitIndex === section.units.length - 1}
+                              title="لأسفل"
+                              className="w-10 h-10 flex items-center justify-center rounded-lg border-2 border-ink/10 text-ink/40 hover:text-primary hover:border-primary/40 hover:bg-primary/5 disabled:opacity-20 transition-colors"
+                            >
+                              ↓
+                            </button>
                             <button
                               onClick={() => setExportModal({ scope: { unitId: unit.id }, title: unit.title })}
                               className="px-4 py-2.5 rounded-lg border-2 border-ink/10 text-base font-bold text-primary hover:border-primary/40 hover:bg-primary/5 transition-colors"
                             >
                               تصدير
+                            </button>
+                            <button
+                              onClick={() => openMoveUnit(unit)}
+                              className="px-4 py-2.5 rounded-lg border-2 border-ink/10 text-base font-bold text-primary hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                            >
+                              نقل
                             </button>
                             <button
                               onClick={() => openEditUnit(unit)}
@@ -786,6 +916,11 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
                                         <div className="flex-1 min-w-0">
                                           <p className="font-bold text-base break-words">{item.title}</p>
                                           <p className="text-sm text-ink/40">{typeLabels[item.type]}</p>
+                                          {item.type === "test" && unsolvedTestIds.has(item.id) && (
+                                            <span className="inline-block mt-1 text-xs font-bold text-primary bg-yellow/25 rounded-full px-2.5 py-1">
+                                              ⊘ قيد الحل — فيه أسئلة محتاجة مراجعتك
+                                            </span>
+                                          )}
                                         </div>
                                       </div>
                                       <div className="flex items-center gap-1 shrink-0">
@@ -885,6 +1020,13 @@ export default function CourseContentManager({ courseId, courseTitle }: { course
         onSectionChange={changeMoveSection}
         onConfirm={confirmMove}
         onClose={closeMoveModal}
+      />
+
+      <CourseMoveUnitModal
+        modal={moveUnitModal}
+        onSectionIdChange={(sectionId) => setMoveUnitModal((prev) => ({ ...prev, sectionId }))}
+        onConfirm={confirmMoveUnit}
+        onClose={closeMoveUnitModal}
       />
 
       {exportModal && (

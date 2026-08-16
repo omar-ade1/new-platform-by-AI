@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import QuestionReviewCard, { type ReviewQuestion } from "@/components/shared/QuestionReviewCard";
 import TopicPerformance, { type TopicStat } from "@/components/shared/TopicPerformance";
 import { scoreTier } from "@/lib/format";
@@ -60,22 +61,22 @@ function AttemptRow({
 
   return (
     <div className="print:break-inside-avoid">
-      <button onClick={onToggle} className="w-full flex items-center justify-between gap-4 p-5 hover:bg-primary/5 transition-colors text-right">
+      <button onClick={onToggle} className="w-full flex items-center justify-between gap-4 p-4 hover:bg-primary/5 transition-colors text-right">
         <ChevronIcon open={expanded} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-display font-bold text-lg">{attempt.tests?.content_items?.title || "اختبار"}</p>
-            {courseTitle && <span className="text-sm text-primary/60 bg-primary/5 rounded-full px-3 py-0.5 shrink-0">{courseTitle}</span>}
+            <p className="font-display font-bold text-base">{attempt.tests?.content_items?.title || "اختبار"}</p>
+            {courseTitle && <span className="text-sm text-primary/60 bg-primary/5 rounded-lg px-2.5 py-0.5 shrink-0">{courseTitle}</span>}
           </div>
           <p className="text-sm text-ink/50 mt-1">
             {attempt.completed_at ? new Date(attempt.completed_at).toLocaleDateString("ar-EG") : "—"} · {attempt.score}/{attempt.total_questions} إجابة
             صح
           </p>
-          <div className="h-2 w-40 rounded-full bg-ink/10 overflow-hidden mt-2.5">
+          <div className="h-2 w-40 rounded-full bg-ink/10 overflow-hidden mt-2">
             <div className={`h-full rounded-full ${tier.bar}`} style={{ width: `${pct ?? 0}%` }} />
           </div>
         </div>
-        <span className={`shrink-0 font-display font-black text-xl rounded-full px-4 py-2 ${tier.text} ${tier.bg}`}>
+        <span className={`shrink-0 font-display font-black text-lg rounded-lg px-3.5 py-1.5 ${tier.text} ${tier.bg}`}>
           {pct !== null ? `${pct}%` : "—"}
         </span>
       </button>
@@ -408,60 +409,62 @@ export default function AdminReportsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 print:hidden">
-        <div>
-          <h1 className="font-display font-black text-3xl text-primary mb-2">التقارير</h1>
-          <p className="text-ink/60 text-lg">تقرير تفصيلي عن نتايج أي طالب في اختباراته</p>
-        </div>
-        {selectedStudent && (
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => window.print()}
-              className="shrink-0 px-6 py-3.5 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors"
-            >
-              طباعة الدرجات
-            </button>
-            <button
-              onClick={handlePrintDetailed}
-              disabled={preparingDetailedPrint}
-              className="shrink-0 px-6 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
-            >
-              {preparingDetailedPrint ? "جاري التجهيز..." : "طباعة بالتفصيل"}
-            </button>
-          </div>
-        )}
+      <div className="print:hidden">
+        <AdminPageHeader
+          title="التقارير"
+          description="تقرير تفصيلي عن نتايج أي طالب في اختباراته"
+          action={
+            selectedStudent && (
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  onClick={() => window.print()}
+                  className="shrink-0 px-4 py-2.5 rounded-lg border border-primary/20 text-primary font-display font-bold text-sm hover:bg-primary/5 transition-colors"
+                >
+                  طباعة الدرجات
+                </button>
+                <button
+                  onClick={handlePrintDetailed}
+                  disabled={preparingDetailedPrint}
+                  className="shrink-0 px-4 py-2.5 rounded-lg bg-primary text-white font-display font-bold text-sm hover:bg-pink transition-colors disabled:opacity-60"
+                >
+                  {preparingDetailedPrint ? "جاري التجهيز..." : "طباعة بالتفصيل"}
+                </button>
+              </div>
+            )
+          }
+        />
       </div>
 
       {!selectedStudent ? (
         <>
-          <div className="mb-6">
+          <div className="mb-5">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث بالاسم أو رقم الهاتف..."
-              className="w-full max-w-md rounded-2xl border-2 border-ink/10 px-5 py-4 text-lg focus:border-primary outline-none transition-colors"
+              className="w-full max-w-sm rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
             />
           </div>
 
           {loadingStudents ? (
-            <p className="text-ink/40 text-lg">جاري التحميل...</p>
+            <p className="text-ink/40 text-base">جاري التحميل...</p>
           ) : filteredStudents.length === 0 ? (
-            <p className="text-ink/40 text-lg">مفيش نتايج مطابقة للبحث.</p>
+            <p className="text-ink/40 text-base">مفيش نتايج مطابقة للبحث.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {filteredStudents.map((student) => (
                 <button
                   key={student.id}
                   onClick={() => selectStudent(student)}
-                  className="w-full flex items-center gap-4 rounded-2xl border-2 border-ink/10 bg-surface p-5 hover:border-primary/40 hover:bg-primary/5 transition-colors text-right"
+                  className="w-full flex items-center gap-3.5 rounded-xl border border-ink/10 bg-surface p-4 hover:border-primary/40 hover:bg-primary/5 transition-colors text-right"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xl shrink-0">
+                  <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-lg shrink-0">
                     {student.full_name?.[0] || "ط"}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-display font-bold text-lg break-words">{student.full_name || "بدون اسم"}</p>
-                    <p className="text-ink/50 text-base" dir="ltr">
+                    <p className="font-display font-bold text-base break-words">{student.full_name || "بدون اسم"}</p>
+                    <p className="text-ink/50 text-sm" dir="ltr">
                       {student.phone || "—"}
                     </p>
                   </div>
@@ -481,32 +484,32 @@ export default function AdminReportsPage() {
           toDate={toDate}
         />
       ) : (
-        <div className="space-y-6">
-          <button onClick={backToList} className="print:hidden text-primary font-bold text-base hover:text-pink transition-colors">
+        <div className="space-y-5">
+          <button onClick={backToList} className="print:hidden text-primary font-bold text-sm hover:text-pink transition-colors">
             ‹ رجوع لقايمة الطلاب
           </button>
 
           <ReportPrintHeader student={selectedStudent} courseTitle={courseFilterTitle} fromDate={fromDate} toDate={toDate} />
 
-          <div className="bg-surface rounded-2xl border-2 border-ink/10 p-6 flex items-center gap-4 print:hidden">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center font-display font-black text-primary text-2xl shrink-0">
+          <div className="bg-surface rounded-xl border border-ink/10 p-5 flex items-center gap-3.5 print:hidden">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center font-display font-black text-primary text-xl shrink-0">
               {selectedStudent.full_name?.[0] || "ط"}
             </div>
             <div className="min-w-0">
-              <p className="font-display font-black text-xl">{selectedStudent.full_name || "بدون اسم"}</p>
-              <p className="text-ink/50 text-base" dir="ltr">
+              <p className="font-display font-bold text-lg">{selectedStudent.full_name || "بدون اسم"}</p>
+              <p className="text-ink/50 text-sm" dir="ltr">
                 {selectedStudent.phone || "—"}
               </p>
             </div>
           </div>
 
-          <div className="print:hidden flex flex-wrap items-end gap-4">
+          <div className="print:hidden flex flex-wrap items-end gap-3.5">
             <div>
-              <label className="block font-bold text-base mb-2">الدورة</label>
+              <label className="block font-bold text-sm mb-1.5">الدورة</label>
               <select
                 value={courseFilter}
                 onChange={(e) => setCourseFilter(e.target.value)}
-                className="rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors bg-surface min-w-[220px]"
+                className="rounded-lg border border-ink/15 px-4 py-2.5 text-base focus:border-primary outline-none transition-colors bg-surface min-w-[220px]"
               >
                 <option value="">كل الدورات</option>
                 {enrollments.map((e) =>
@@ -519,21 +522,21 @@ export default function AdminReportsPage() {
               </select>
             </div>
             <div>
-              <label className="block font-bold text-base mb-2">من تاريخ</label>
+              <label className="block font-bold text-sm mb-1.5">من تاريخ</label>
               <input
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors bg-surface"
+                className="rounded-lg border border-ink/15 px-4 py-2.5 text-base focus:border-primary outline-none transition-colors bg-surface"
               />
             </div>
             <div>
-              <label className="block font-bold text-base mb-2">إلى تاريخ</label>
+              <label className="block font-bold text-sm mb-1.5">إلى تاريخ</label>
               <input
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
-                className="rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors bg-surface"
+                className="rounded-lg border border-ink/15 px-4 py-2.5 text-base focus:border-primary outline-none transition-colors bg-surface"
               />
             </div>
             {(courseFilter || fromDate || toDate) && (
@@ -543,7 +546,7 @@ export default function AdminReportsPage() {
                   setFromDate("");
                   setToDate("");
                 }}
-                className="text-primary font-bold text-base hover:text-pink transition-colors pb-3.5"
+                className="text-primary font-bold text-sm hover:text-pink transition-colors pb-2.5"
               >
                 مسح الفلاتر
               </button>
@@ -551,34 +554,34 @@ export default function AdminReportsPage() {
           </div>
 
           {loadingReport ? (
-            <p className="text-ink/40 text-lg">جاري التحميل...</p>
+            <p className="text-ink/40 text-base">جاري التحميل...</p>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-4 print:gap-3 break-inside-avoid">
+              <div className="grid grid-cols-3 gap-3.5 print:gap-3 break-inside-avoid">
                 {stats.map((s) => (
                   <div
                     key={s.label}
-                    className="bg-surface rounded-2xl border-2 border-ink/10 p-5 text-center space-y-1 print:rounded-lg print:border print:p-2"
+                    className="bg-surface rounded-xl border border-ink/10 p-4 text-center space-y-1 print:rounded-lg print:border print:p-2"
                   >
-                    <p className="font-display font-black text-3xl text-primary print:text-lg">{s.value}</p>
+                    <p className="font-display font-black text-2xl text-primary print:text-lg">{s.value}</p>
                     <p className="text-sm text-ink/50 font-bold print:text-xs">{s.label}</p>
                   </div>
                 ))}
               </div>
 
               {!loadingTopics && topics.length > 0 && (
-                <div className="space-y-4 print:space-y-2 break-inside-avoid">
-                  <h2 className="font-display font-bold text-xl print:text-base">نقاط القوة والضعف</h2>
+                <div className="space-y-3.5 print:space-y-2 break-inside-avoid">
+                  <h2 className="font-display font-bold text-lg print:text-base">نقاط القوة والضعف</h2>
                   <TopicPerformance topics={topics} />
                 </div>
               )}
 
-              <div className="space-y-4 print:space-y-2">
-                <h2 className="font-display font-bold text-xl print:text-base">نتائج الاختبارات</h2>
+              <div className="space-y-3.5 print:space-y-2">
+                <h2 className="font-display font-bold text-lg print:text-base">نتائج الاختبارات</h2>
                 {filteredAttempts.length === 0 ? (
                   <p className="text-ink/50 text-base">مفيش نتايج مطابقة للفلاتر دي.</p>
                 ) : (
-                  <div className="bg-surface rounded-2xl border-2 border-ink/10 divide-y divide-ink/10">
+                  <div className="bg-surface rounded-xl border border-ink/10 divide-y divide-ink/10">
                     {filteredAttempts.map((a) => (
                       <AttemptRow
                         key={a.id}

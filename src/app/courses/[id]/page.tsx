@@ -74,6 +74,20 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
     sections = sortTree((data as unknown as SectionNode[]) ?? []);
 
+    // أي اختبار فيه سؤال واحد على الأقل غير محلول (معندوش اختيار متعلّم إنه صح) بيتخفي تمامًا عن
+    // الطالب لحد ما الأدمن يراجعه ويحله — الاختبار لسه "قيد الإعداد".
+    const { data: unsolvedTestIds } = await supabase.rpc("get_unsolved_test_ids", { p_course_id: id });
+    const unsolvedSet = new Set<string>(unsolvedTestIds ?? []);
+    if (unsolvedSet.size > 0) {
+      sections = sections.map((s) => ({
+        ...s,
+        units: s.units.map((u) => ({
+          ...u,
+          content_items: u.content_items.filter((item) => !(item.type === "test" && unsolvedSet.has(item.id))),
+        })),
+      }));
+    }
+
     const trackableIds = sections.flatMap((s) => s.units.flatMap((u) => u.content_items.map((i) => i.id)));
     totalTrackable = trackableIds.length;
 

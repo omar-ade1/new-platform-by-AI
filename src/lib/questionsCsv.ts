@@ -5,6 +5,7 @@ export type ParsedQuestionRow = {
   question_text: string;
   options: { letter: string; text: string }[];
   correctLetter: string;
+  solved: boolean;
   errors: string[];
 };
 
@@ -55,7 +56,9 @@ function parseCsv(text: string): string[][] {
 }
 
 // بيقرأ ملف CSV فيه: نص السؤال، اختيار أ، اختيار ب، اختيار ج، اختيار د، الإجابة الصح
-// (أول سطر عناوين، بيتشال). كل صف بيرجع مع أي أخطاء تحقق (نص فاضي، إجابة صح مش موجودة... إلخ)
+// (أول سطر عناوين، بيتشال). عمود "الإجابة الصح" اختياري — لو سايبه فاضي، السؤال بيتضاف
+// "غير محلول" (solved: false) عشان المعلم يراجعه ويحله بعدين، بس لو مكتوب فيه حاجة لازم تكون
+// أ/ب/ج/د صح، وإلا الصف بيترفض زي أي خطأ تاني.
 export function parseQuestionsCsv(text: string): ParsedQuestionRow[] {
   const rows = parseCsv(text);
   if (rows.length === 0) return [];
@@ -67,24 +70,26 @@ export function parseQuestionsCsv(text: string): ParsedQuestionRow[] {
       const questionText = (cells[0] ?? "").trim();
       const options = OPTION_LETTERS.map((letter, idx) => ({ letter, text: (cells[idx + 1] ?? "").trim() }));
       const correctLetter = (cells[5] ?? "").trim();
+      const solved = correctLetter !== "";
 
       const errors: string[] = [];
       if (!questionText) errors.push("نص السؤال فاضي");
       for (const opt of options) {
         if (!opt.text) errors.push(`الاختيار (${opt.letter}) فاضي`);
       }
-      if (!(OPTION_LETTERS as readonly string[]).includes(correctLetter)) {
-        errors.push('عمود "الإجابة الصح" لازم يكون أ أو ب أو ج أو د');
+      if (solved && !(OPTION_LETTERS as readonly string[]).includes(correctLetter)) {
+        errors.push('عمود "الإجابة الصح" لازم يكون فاضي أو أ أو ب أو ج أو د');
       }
 
-      return { rowNumber: i + 2, question_text: questionText, options, correctLetter, errors };
+      return { rowNumber: i + 2, question_text: questionText, options, correctLetter, solved, errors };
     });
 }
 
 export function buildQuestionsCsvTemplate(): string {
   const header = "نص السؤال,اختيار أ,اختيار ب,اختيار ج,اختيار د,الإجابة الصح";
   const example = 'مرادف كلمة "سعيد",حزين,فرحان,غاضب,خائف,ب';
-  return `${header}\n${example}\n`;
+  const unsolvedExample = 'مرادف كلمة "بديع",قبيح,رائع,عادي,صغير,';
+  return `${header}\n${example}\n${unsolvedExample}\n`;
 }
 
 function csvEscape(field: string): string {

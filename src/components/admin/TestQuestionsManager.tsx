@@ -31,22 +31,6 @@ const RANDOM_POOL_LIMIT = 3000;
 
 const optionLetters = ["أ", "ب", "ج", "د", "هـ", "و", "ز", "ح"];
 
-function ChevronIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      className={`shrink-0 transition-transform ${open ? "" : "-rotate-90"}`}
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
 function shuffle<T>(list: T[]): T[] {
   const copy = [...list];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -118,7 +102,6 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(new Set());
-  const [expandedQuestionIds, setExpandedQuestionIds] = useState<Set<string>>(new Set());
   const [busyQuestionId, setBusyQuestionId] = useState<string | null>(null);
   const [newOptionText, setNewOptionText] = useState<Record<string, string>>({});
 
@@ -295,15 +278,6 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
 
   function toggleCategoryExpanded(id: string) {
     setExpandedCategoryIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  function toggleQuestionExpanded(id: string) {
-    setExpandedQuestionIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -609,28 +583,9 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
     setCreatingQuickQuestion(false);
   }
 
-  // استيراد أسئلة بالجملة من CSV — بتتحط في تصنيف "عامة" الافتراضي (زي "+ سؤال جديد" السريع)
-  // وتتضاف للاختبار ده على طول
-  async function handleImportQuestions(rows: ParsedQuestionRow[]) {
-    let categoryId: string;
-    const existingDefault = categories.find((c) => c.title === DEFAULT_CATEGORY_TITLE && c.parent_id === null);
-    if (existingDefault) {
-      categoryId = existingDefault.id;
-    } else {
-      const rootSiblings = categories.filter((c) => c.parent_id === null);
-      const { data: newCategory, error: catError } = await supabase
-        .from("question_categories")
-        .insert({ title: DEFAULT_CATEGORY_TITLE, parent_id: null, order_index: getNextOrderIndex(rootSiblings) })
-        .select()
-        .single();
-      if (catError || !newCategory) {
-        toast.error("حصل خطأ في إنشاء التصنيف الافتراضي");
-        return;
-      }
-      categoryId = newCategory.id;
-      setCategories((prev) => [...prev, newCategory]);
-    }
-
+  // استيراد أسئلة بالجملة من CSV — بتتحط في التصنيف اللي الأدمن يختاره في نافذة الاستيراد، وتتضاف
+  // للاختبار ده على طول. أسئلة من غير إجابة صح بتتضاف "غير محلولة" (كل اختياراتها is_correct: false).
+  async function handleImportQuestions(rows: ParsedQuestionRow[], categoryId: string) {
     const orderStart = await nextOrderIndexOnServer("questions", "category_id", categoryId);
     const questionRows = rows.map((r, i) => ({
       question_text: r.question_text,
@@ -669,7 +624,12 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
     if (tqBulkError) {
       toast.error("الأسئلة اتضافت للبنك بس حصل خطأ في ضمها للاختبار");
     } else {
-      toast.success(`اتضاف ${rows.length} سؤال للبنك ولاختبار كمان`);
+      const unsolvedCount = rows.filter((r) => !r.solved).length;
+      toast.success(
+        `اتضاف ${rows.length} سؤال للبنك ولاختبار كمان${
+          unsolvedCount > 0 ? ` (${unsolvedCount} منهم غير محلول — الاختبار هيفضل مخفي عن الطلبة لحد ما تحلهم)` : ""
+        }`
+      );
       setTestQuestions((prev) => [...prev, ...(newTestQuestions ?? [])]);
       await fetchAndMergeAttachedQuestions(insertedQuestions.map((q) => q.id as string));
     }
@@ -932,31 +892,31 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border-2 border-ink/10 bg-surface p-6">
+      <div className="rounded-xl border border-ink/10 bg-surface p-6">
         <div className="flex flex-wrap items-center justify-between mb-5 gap-3">
-          <h2 className="font-display font-bold text-xl w-full sm:w-auto break-words">أسئلة الاختبار الحالية ({attachedList.length})</h2>
+          <h2 className="font-display font-bold text-lg w-full sm:w-auto break-words">أسئلة الاختبار الحالية ({attachedList.length})</h2>
           <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
             <button
               onClick={() => setImportModalOpen(true)}
-              className="px-5 py-3 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors"
+              className="px-4 py-2.5 rounded-lg border border-primary/20 text-primary font-display font-bold text-sm hover:bg-primary/5 transition-colors"
             >
               استيراد من CSV
             </button>
             <button
               onClick={() => setExportModalOpen(true)}
-              className="px-5 py-3 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors"
+              className="px-4 py-2.5 rounded-lg border border-primary/20 text-primary font-display font-bold text-sm hover:bg-primary/5 transition-colors"
             >
               تصدير
             </button>
             <button
               onClick={openRandomModal}
-              className="px-5 py-3 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors"
+              className="px-4 py-2.5 rounded-lg border border-primary/20 text-primary font-display font-bold text-sm hover:bg-primary/5 transition-colors"
             >
               اختبار عشوائي
             </button>
             <button
               onClick={openQuickAddModal}
-              className="px-5 py-3 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors"
+              className="px-4 py-2.5 rounded-lg bg-primary text-white font-display font-bold text-sm hover:bg-pink transition-colors"
             >
               + سؤال جديد
             </button>
@@ -967,21 +927,19 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
         ) : (
           <div className="space-y-2.5">
             {attachedList.map(({ testQuestion, question }, index) => {
-              const isExpanded = !!question && expandedQuestionIds.has(question.id);
+              const solved = !!question && (optionsByQuestion.get(question.id) ?? []).some((o) => o.is_correct);
               return (
-                <div key={testQuestion.id} className="rounded-2xl border-2 border-ink/10 overflow-hidden">
-                  <div className="flex flex-wrap items-center gap-3 px-4 py-3.5 bg-ink/[0.02]">
-                    <button
-                      onClick={() => question && toggleQuestionExpanded(question.id)}
-                      disabled={!question}
-                      className="w-full sm:w-auto sm:flex-1 min-w-0 flex items-center gap-3 text-right"
-                    >
-                      <ChevronIcon open={isExpanded} />
+                <div
+                  key={testQuestion.id}
+                  className={`rounded-2xl border-2 overflow-hidden ${question && !solved ? "border-yellow/50" : "border-ink/10"}`}
+                >
+                  <div className={`flex flex-wrap items-center gap-3 px-4 py-3.5 ${question && !solved ? "bg-yellow/[0.07]" : "bg-ink/[0.02]"}`}>
+                    <div className="w-full sm:w-auto sm:flex-1 min-w-0 flex items-center gap-3">
                       <span className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
                         {index + 1}
                       </span>
                       <p className="flex-1 min-w-0 text-base font-bold break-words">{question?.question_text || "سؤال محذوف"}</p>
-                    </button>
+                    </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => reorderAttached(testQuestion, "up")}
@@ -1014,7 +972,15 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
                       </button>
                     </div>
                   </div>
-                  {isExpanded && question && renderQuestionEditor(question)}
+                  {question && !solved && (
+                    <div className="flex items-center gap-2.5 bg-yellow/25 px-4 py-3">
+                      <span className="w-7 h-7 rounded-full bg-yellow flex items-center justify-center text-primary font-black text-sm shrink-0">
+                        ⊘
+                      </span>
+                      <p className="text-sm font-bold text-primary">السؤال ده لسه غير محلول — مفيش إجابة متحددة كصح، والاختبار مخفي عن الطلبة لحد ما تحله</p>
+                    </div>
+                  )}
+                  {question && renderQuestionEditor(question)}
                 </div>
               );
             })}
@@ -1022,9 +988,9 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
         )}
       </div>
 
-      <div className="grid md:grid-cols-[340px_minmax(0,1fr)] gap-6 items-start">
-        <div className="rounded-2xl border-2 border-ink/10 bg-surface p-4 min-w-0 overflow-x-auto">
-          <p className="font-display font-bold text-lg mb-3 px-1">تصفح بنك الأسئلة</p>
+      <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-5 items-start">
+        <div className="rounded-xl border border-ink/10 bg-surface p-4 min-w-0 overflow-x-auto">
+          <p className="font-display font-bold text-base mb-3 px-1">تصفح بنك الأسئلة</p>
           {categoryTree.length === 0 ? (
             <p className="text-ink/40 text-base px-1">لسه مفيش تصنيفات في البنك.</p>
           ) : (
@@ -1032,7 +998,7 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
           )}
         </div>
 
-        <div className="rounded-2xl border-2 border-ink/10 bg-surface p-6 min-h-[200px] min-w-0">
+        <div className="rounded-xl border border-ink/10 bg-surface p-6 min-h-[200px] min-w-0">
           {!selectedCategory ? (
             <p className="text-ink/40 text-lg">اختار تصنيف عشان تشوف أسئلته وتضيفها للاختبار.</p>
           ) : loadingCategoryContent ? (
@@ -1049,17 +1015,13 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
                   .sort((a, b) => a.order_index - b.order_index)
                   .map((question) => {
                     const isAttached = attachedQuestionIds.has(question.id);
-                    const isExpanded = expandedQuestionIds.has(question.id);
+                    const solved = (optionsByQuestion.get(question.id) ?? []).some((o) => o.is_correct);
                     return (
-                      <div key={question.id} className="rounded-2xl border-2 border-ink/10 overflow-hidden">
-                        <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
-                          <button
-                            onClick={() => toggleQuestionExpanded(question.id)}
-                            className="w-full sm:w-auto sm:flex-1 min-w-0 flex items-center gap-3 text-right"
-                          >
-                            <ChevronIcon open={isExpanded} />
+                      <div key={question.id} className={`rounded-2xl border-2 overflow-hidden ${solved ? "border-ink/10" : "border-yellow/50"}`}>
+                        <div className={`flex flex-wrap items-center gap-3 px-4 py-3.5 ${solved ? "" : "bg-yellow/[0.07]"}`}>
+                          <div className="w-full sm:w-auto sm:flex-1 min-w-0 flex items-center gap-3">
                             <p className="flex-1 min-w-0 text-base font-bold break-words">{question.question_text}</p>
-                          </button>
+                          </div>
                           <button
                             onClick={() => openEditQuestionModal(question)}
                             className="shrink-0 px-4 py-2.5 rounded-full border-2 border-primary/20 text-sm font-bold text-primary hover:bg-primary/5 transition-colors"
@@ -1083,7 +1045,15 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
                             </button>
                           )}
                         </div>
-                        {isExpanded && renderQuestionEditor(question)}
+                        {!solved && (
+                          <div className="flex items-center gap-2.5 bg-yellow/25 px-4 py-3">
+                            <span className="w-7 h-7 rounded-full bg-yellow flex items-center justify-center text-primary font-black text-sm shrink-0">
+                              ⊘
+                            </span>
+                            <p className="text-sm font-bold text-primary">السؤال ده لسه غير محلول — مفيش إجابة متحددة كصح</p>
+                          </div>
+                        )}
+                        {renderQuestionEditor(question)}
                       </div>
                     );
                   })}
@@ -1148,7 +1118,13 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
         onClose={closeEditQuestionModal}
       />
 
-      <ImportQuestionsModal open={importModalOpen} onClose={() => setImportModalOpen(false)} onConfirm={handleImportQuestions} />
+      <ImportQuestionsModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onConfirm={handleImportQuestions}
+        categories={flattenedCategories}
+        defaultCategoryId={selectedCategoryId}
+      />
       <ExportQuestionsModal
         open={exportModalOpen}
         onClose={() => setExportModalOpen(false)}

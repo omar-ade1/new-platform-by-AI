@@ -50,11 +50,11 @@ export default function TestRandomBuilderModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-lg max-h-[85vh] overflow-y-auto"
+            className="bg-surface rounded-xl p-7 w-full max-w-lg max-h-[85vh] overflow-y-auto"
           >
             {preview === null ? (
               <>
-                <h2 className="font-display font-black text-2xl text-primary mb-2">اختبار عشوائي</h2>
+                <h2 className="font-display font-bold text-xl text-primary mb-2">اختبار عشوائي</h2>
                 <p className="text-ink/50 text-base mb-6">
                   اختار تصنيف أو أكتر (بيشمل تصنيفاته الفرعية تلقائي) وحدد عدد الأسئلة، وهنقترحلك أسئلة عشوائية منهم.
                 </p>
@@ -91,7 +91,7 @@ export default function TestRandomBuilderModal({
                     min={1}
                     value={count}
                     onChange={(e) => onCountChange(Math.max(1, Number(e.target.value) || 1))}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                   />
                   <p className="text-sm text-ink/40 mt-2">
                     {loadingPool ? "جاري تحميل الأسئلة المتاحة..." : `متاح ${pool.length} سؤال في التصنيفات المختارة (مش هيكرر أي سؤال متضاف في الاختبار خلاص).`}
@@ -102,18 +102,18 @@ export default function TestRandomBuilderModal({
                   <button
                     onClick={onDraw}
                     disabled={selectedCategoryIds.size === 0 || loadingPool}
-                    className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
+                    className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
                   >
                     اقترح أسئلة عشوائية
                   </button>
-                  <button onClick={onClose} className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors">
+                  <button onClick={onClose} className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors">
                     إلغاء
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <h2 className="font-display font-black text-2xl text-primary mb-2">مراجعة الاختيار</h2>
+                <h2 className="font-display font-bold text-xl text-primary mb-2">مراجعة الاختيار</h2>
                 <p className="text-ink/50 text-base mb-5">
                   هيتضاف {preview.length} سؤال للاختبار.
                   {preview.length > count && " العدد زاد شوية عشان أسئلة نص القراءة المشترك بتتضاف مع بعض من غير تقسيم."}
@@ -132,21 +132,21 @@ export default function TestRandomBuilderModal({
                   <button
                     onClick={onConfirmAdd}
                     disabled={adding}
-                    className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
+                    className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
                   >
                     {adding ? "جاري الإضافة..." : "تأكيد الإضافة"}
                   </button>
                   <button
                     onClick={onDraw}
                     disabled={adding}
-                    className="px-6 py-3.5 rounded-full border-2 border-primary/20 text-primary font-bold text-base hover:bg-primary/5 transition-colors disabled:opacity-40"
+                    className="px-5 py-3 rounded-lg border border-primary/20 text-primary font-bold text-base hover:bg-primary/5 transition-colors disabled:opacity-40"
                   >
                     أعد الاختيار
                   </button>
                   <button
                     onClick={onBackToSelection}
                     disabled={adding}
-                    className="px-6 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors"
+                    className="px-5 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors"
                   >
                     رجوع
                   </button>

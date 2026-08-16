@@ -1,6 +1,6 @@
 // app/admin/courses/[id]/content/page.tsx
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import CourseContentManager from "@/components/admin/CourseContentManager";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,15 +16,11 @@ export default async function AdminCourseContentPage({ params }: { params: Promi
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm text-ink/50 mb-4">
-        <Link href="/admin/courses" className="hover:text-primary transition-colors">
-          الدورات
-        </Link>
-        <span>/</span>
-        <span className="text-ink">{course.title}</span>
-      </div>
-      <h1 className="font-display font-black text-2xl text-primary mb-1">إدارة محتوى: {course.title}</h1>
-      <p className="text-ink/60 text-sm mb-6">الأقسام والوحدات والعناصر (فيديو/ملف/ملاحظة/اختبار) بتاعة الدورة دي</p>
+      <AdminPageHeader
+        breadcrumb={[{ label: "الدورات", href: "/admin/courses" }, { label: course.title }]}
+        title={`إدارة محتوى: ${course.title}`}
+        description="الأقسام والوحدات والعناصر (فيديو/ملف/ملاحظة/اختبار) بتاعة الدورة دي"
+      />
 
       <CourseContentManager courseId={course.id} courseTitle={course.title} />
     </div>

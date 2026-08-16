@@ -42,9 +42,9 @@ export default function CourseItemModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-lg my-8"
+            className="bg-surface rounded-xl p-7 w-full max-w-lg my-8"
           >
-            <h2 className="font-display font-black text-2xl text-primary mb-6">{modal.editing ? "تعديل العنصر" : "إضافة عنصر جديد"}</h2>
+            <h2 className="font-display font-bold text-xl text-primary mb-6">{modal.editing ? "تعديل العنصر" : "إضافة عنصر جديد"}</h2>
             <form onSubmit={onSave} className="space-y-5">
               <div>
                 <label className="block font-bold text-base mb-2">النوع *</label>
@@ -52,7 +52,7 @@ export default function CourseItemModal({
                   value={modal.form.type}
                   disabled={!!modal.editing}
                   onChange={(e) => onModalChange({ ...modal, form: { ...modal.form, type: e.target.value as ContentType } })}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5 disabled:text-ink/40"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors disabled:bg-ink/5 disabled:text-ink/40"
                 >
                   <option value="video">فيديو</option>
                   <option value="file">ملف</option>
@@ -69,7 +69,7 @@ export default function CourseItemModal({
                   required
                   value={modal.form.title}
                   onChange={(e) => onModalChange({ ...modal, form: { ...modal.form, title: e.target.value } })}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                 />
               </div>
 
@@ -113,7 +113,7 @@ export default function CourseItemModal({
                       value={modal.form.video_url}
                       onChange={(e) => onModalChange({ ...modal, form: { ...modal.form, video_url: e.target.value } })}
                       placeholder="https://..."
-                      className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                      className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                     />
                   </div>
                   <div>
@@ -122,7 +122,7 @@ export default function CourseItemModal({
                       type="number"
                       value={modal.form.duration_seconds}
                       onChange={(e) => onModalChange({ ...modal, form: { ...modal.form, duration_seconds: e.target.value } })}
-                      className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                      className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                     />
                   </div>
                 </>
@@ -148,7 +148,7 @@ export default function CourseItemModal({
                       }
                       onFileChange(file);
                     }}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors disabled:opacity-60 file:ml-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-primary file:font-bold"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors disabled:opacity-60 file:ml-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-primary file:font-bold"
                   />
                   {modal.editing && <p className="text-sm text-ink/40 mt-2">سيبها فاضية لو مش عايز تستبدل الملف الحالي.</p>}
                   {uploadProgress !== null && (
@@ -170,7 +170,7 @@ export default function CourseItemModal({
                     value={modal.form.note_body}
                     onChange={(e) => onModalChange({ ...modal, form: { ...modal.form, note_body: e.target.value } })}
                     rows={5}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors resize-none"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors resize-none"
                   />
                 </div>
               )}
@@ -182,7 +182,7 @@ export default function CourseItemModal({
                     type="number"
                     value={modal.form.time_limit_minutes}
                     onChange={(e) => onModalChange({ ...modal, form: { ...modal.form, time_limit_minutes: e.target.value } })}
-                    className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                    className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                   />
                   <p className="text-sm text-ink/40 mt-2">تقدر تضيف/ترتّب أسئلة الاختبار ده من زرار &quot;الأسئلة&quot; بعد ما تحفظ.</p>
                 </div>
@@ -192,7 +192,7 @@ export default function CourseItemModal({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
+                  className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
                 >
                   {saving ? (uploadProgress !== null ? `جاري الرفع... ${uploadProgress}%` : "جاري الحفظ...") : "حفظ"}
                 </button>
@@ -200,7 +200,7 @@ export default function CourseItemModal({
                   type="button"
                   onClick={onClose}
                   disabled={saving}
-                  className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
+                  className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
                 >
                   إلغاء
                 </button>

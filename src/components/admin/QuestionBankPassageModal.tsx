@@ -38,9 +38,9 @@ export default function QuestionBankPassageModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-lg max-h-[85vh] overflow-y-auto"
+            className="bg-surface rounded-xl p-7 w-full max-w-lg max-h-[85vh] overflow-y-auto"
           >
-            <h2 className="font-display font-black text-2xl text-primary mb-2">{modal.mode === "add" ? "نص قراءة جديد" : "تعديل النص"}</h2>
+            <h2 className="font-display font-bold text-xl text-primary mb-2">{modal.mode === "add" ? "نص قراءة جديد" : "تعديل النص"}</h2>
             <p className="text-ink/50 text-base mb-6">تقدر تربط أكتر من سؤال بالنص ده بعد ما تحفظه.</p>
             <form onSubmit={onSave} className="space-y-5">
               <div>
@@ -50,7 +50,7 @@ export default function QuestionBankPassageModal({
                   required
                   value={title}
                   onChange={(e) => onTitleChange(e.target.value)}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                 />
               </div>
               <div>
@@ -60,21 +60,21 @@ export default function QuestionBankPassageModal({
                   rows={6}
                   value={body}
                   onChange={(e) => onBodyChange(e.target.value)}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors resize-none"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors resize-none"
                 />
               </div>
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
+                  className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
                 >
                   {saving ? "جاري الحفظ..." : "حفظ"}
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors"
+                  className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors"
                 >
                   إلغاء
                 </button>

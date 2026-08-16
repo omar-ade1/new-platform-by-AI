@@ -30,7 +30,7 @@ export default function QuestionBankDeleteQuestionModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-lg"
+            className="bg-surface rounded-xl p-7 w-full max-w-lg"
           >
             <h2 className="font-display font-black text-xl text-primary mb-5">تأكيد حذف السؤال</h2>
             <p className="text-ink/60 text-base mb-1">
@@ -41,13 +41,13 @@ export default function QuestionBankDeleteQuestionModal({
               <button
                 onClick={onConfirm}
                 disabled={deleting}
-                className="flex-1 py-3.5 rounded-full bg-red-500 text-white font-display font-bold text-base hover:bg-red-600 transition-colors disabled:opacity-60"
+                className="flex-1 py-3 rounded-lg bg-red-500 text-white font-display font-bold text-base hover:bg-red-600 transition-colors disabled:opacity-60"
               >
                 {deleting ? "جاري الحذف..." : "احذف"}
               </button>
               <button
                 onClick={onClose}
-                className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors"
+                className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors"
               >
                 إلغاء
               </button>

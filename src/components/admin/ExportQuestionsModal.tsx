@@ -116,9 +116,9 @@ export default function ExportQuestionsModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-3xl max-h-[85vh] overflow-y-auto"
+            className="bg-surface rounded-xl p-7 w-full max-w-3xl max-h-[85vh] overflow-y-auto"
           >
-            <h2 className="font-display font-black text-2xl text-primary mb-2">تصدير الأسئلة</h2>
+            <h2 className="font-display font-bold text-xl text-primary mb-2">تصدير الأسئلة</h2>
             <p className="text-ink/50 text-base mb-2">هيتم جلب الأسئلة من القاعدة مباشرة وتحويلها للصيغة اللي تختارها.</p>
 
             {questions === null && !loadError && <p className="text-ink/50 text-base mb-6">جاري تجهيز الأسئلة...</p>}
@@ -143,7 +143,7 @@ export default function ExportQuestionsModal({
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
                 />
               </div>
 
@@ -219,7 +219,7 @@ export default function ExportQuestionsModal({
                 <button
                   onClick={() => handleDownload()}
                   disabled={generating !== "none" || !canDownload}
-                  className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
+                  className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
                 >
                   {generating === "csv" ? "جاري التجهيز..." : "نزّل CSV"}
                 </button>
@@ -228,14 +228,14 @@ export default function ExportQuestionsModal({
                   <button
                     onClick={() => handleDownload(false)}
                     disabled={generating !== "none" || !canDownload}
-                    className="px-6 py-3.5 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors disabled:opacity-40"
+                    className="px-5 py-3 rounded-lg border border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors disabled:opacity-40"
                   >
                     {generating === "unsolved" ? "جاري التجهيز..." : "نزّل (بدون حل)"}
                   </button>
                   <button
                     onClick={() => handleDownload(true)}
                     disabled={generating !== "none" || !canDownload}
-                    className="px-6 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
+                    className="px-5 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-40"
                   >
                     {generating === "solved" ? "جاري التجهيز..." : "نزّل (محلولة)"}
                   </button>
@@ -244,7 +244,7 @@ export default function ExportQuestionsModal({
               <button
                 onClick={handleClose}
                 disabled={generating !== "none"}
-                className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
+                className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors disabled:opacity-60"
               >
                 إلغاء
               </button>
@@ -259,14 +259,14 @@ export default function ExportQuestionsModal({
                   <button
                     onClick={() => handlePrintPdf(false)}
                     disabled={!canDownload}
-                    className="px-6 py-3.5 rounded-full border-2 border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
+                    className="px-5 py-3 rounded-lg border border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
                   >
                     PDF (بدون حل)
                   </button>
                   <button
                     onClick={() => handlePrintPdf(true)}
                     disabled={!canDownload}
-                    className="px-6 py-3.5 rounded-full border-2 border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
+                    className="px-5 py-3 rounded-lg border border-teal/30 text-teal font-display font-bold text-base hover:bg-teal/5 transition-colors disabled:opacity-40"
                   >
                     PDF (محلولة)
                   </button>

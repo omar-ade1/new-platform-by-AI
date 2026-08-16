@@ -21,9 +21,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="grid md:grid-cols-[280px_minmax(0,1fr)] print:block min-h-[calc(100vh-4rem)]">
+    <div className="grid md:grid-cols-[240px_minmax(0,1fr)] print:block min-h-[calc(100vh-4rem)]">
       <AdminSidebar />
-      <main className="p-6 md:p-10 min-w-0 overflow-x-hidden">{children}</main>
+      <main className="p-5 md:p-8 min-w-0 overflow-x-hidden">{children}</main>
     </div>
   );
 }

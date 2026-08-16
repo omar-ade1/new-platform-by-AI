@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import ImportQuestionsModal from "@/components/admin/ImportQuestionsModal";
 import ExportQuestionsModal from "@/components/admin/ExportQuestionsModal";
 import QuestionBankCategoryModal from "@/components/admin/QuestionBankCategoryModal";
@@ -12,7 +13,7 @@ import QuestionBankPassageModal from "@/components/admin/QuestionBankPassageModa
 import QuestionBankDeletePassageModal from "@/components/admin/QuestionBankDeletePassageModal";
 import Pagination from "@/components/shared/Pagination";
 import type { ParsedQuestionRow } from "@/lib/questionsCsv";
-import { buildCategoryTree, collectDescendantIds, type CategoryNode, type QuestionCategory } from "@/lib/supabase/questionBank";
+import { buildCategoryTree, collectDescendantIds, flattenCategoryTree, type CategoryNode, type QuestionCategory } from "@/lib/supabase/questionBank";
 import { fetchQuestionsByCategoryIds } from "@/lib/supabase/questionExport";
 import { supabase } from "@/lib/supabase/client";
 
@@ -178,6 +179,7 @@ export default function QuestionBankManager() {
   }
 
   const categoryTree = useMemo(() => buildCategoryTree(categories), [categories]);
+  const flattenedCategories = useMemo(() => flattenCategoryTree(categoryTree), [categoryTree]);
   const categoriesById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
   const optionsByQuestion = useMemo(() => {
@@ -519,14 +521,14 @@ export default function QuestionBankManager() {
     setDeletingQuestion(false);
   }
 
-  // استيراد أسئلة بالجملة من CSV — كلها بتتضاف للتصنيف المفتوح دلوقتي
-  async function handleImportQuestions(rows: ParsedQuestionRow[]) {
-    if (!selectedCategoryId) return;
-
-    const orderStart = await nextOrderIndexOnServer("questions", "category_id", selectedCategoryId);
+  // استيراد أسئلة بالجملة من CSV — بتتضاف للتصنيف اللي الأدمن يختاره في نافذة الاستيراد نفسها
+  // (ممكن يكون مختلف عن التصنيف المفتوح في الشجرة دلوقتي). أسئلة من غير إجابة صح بتتضاف "غير محلولة"
+  // (كل اختياراتها is_correct: false) — هتظهر كده لحد ما الأدمن يراجعها ويحدد الصح.
+  async function handleImportQuestions(rows: ParsedQuestionRow[], categoryId: string) {
+    const orderStart = await nextOrderIndexOnServer("questions", "category_id", categoryId);
     const questionRows = rows.map((r, i) => ({
       question_text: r.question_text,
-      category_id: selectedCategoryId,
+      category_id: categoryId,
       order_index: orderStart + i,
     }));
 
@@ -552,11 +554,14 @@ export default function QuestionBankManager() {
     if (optError) {
       toast.error("الأسئلة اتضافت بس حصل خطأ في اختياراتها");
     } else {
-      toast.success(`اتضاف ${rows.length} سؤال`);
+      const unsolvedCount = rows.filter((r) => !r.solved).length;
+      toast.success(`اتضاف ${rows.length} سؤال${unsolvedCount > 0 ? ` (${unsolvedCount} منهم غير محلول)` : ""}`);
     }
 
-    const lastPage = Math.max(1, Math.ceil((questionsTotalCount + rows.length) / PAGE_SIZE));
-    fetchCategoryContent(selectedCategoryId, lastPage);
+    if (categoryId === selectedCategoryId) {
+      const lastPage = Math.max(1, Math.ceil((questionsTotalCount + rows.length) / PAGE_SIZE));
+      fetchCategoryContent(selectedCategoryId, lastPage);
+    }
   }
 
   async function reorderQuestion(question: Question, direction: "up" | "down", siblingsList: Question[]) {
@@ -1102,18 +1107,15 @@ export default function QuestionBankManager() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-display font-black text-3xl text-primary mb-2">بنك الأسئلة</h1>
-        <p className="text-ink/60 text-lg">تصنيفات وأسئلة مستقلة عن الدورات، بتتربط بالاختبارات لما تحب</p>
-      </div>
+      <AdminPageHeader title="بنك الأسئلة" description="تصنيفات وأسئلة مستقلة عن الدورات، بتتربط بالاختبارات لما تحب" />
 
-      <div className="mb-6 relative max-w-md">
+      <div className="mb-5 relative max-w-sm">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="دور على سؤال أو نص... (حرفين على الأقل)"
-          className="w-full rounded-2xl border-2 border-ink/10 px-5 py-4 text-lg focus:border-primary outline-none transition-colors"
+          className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
         />
         {searchQuery && (
           <button
@@ -1126,27 +1128,27 @@ export default function QuestionBankManager() {
       </div>
 
       {loadingCategories ? (
-        <p className="text-ink/40 text-lg">جاري التحميل...</p>
+        <p className="text-ink/40 text-base">جاري التحميل...</p>
       ) : (
-        <div className="grid md:grid-cols-[340px_minmax(0,1fr)] gap-6 items-start">
-          <div className="rounded-2xl border-2 border-ink/10 bg-surface p-4 min-w-0 overflow-x-auto">
+        <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-5 items-start">
+          <div className="rounded-xl border border-ink/10 bg-surface p-4 min-w-0 overflow-x-auto">
             <div className="flex items-center justify-between mb-3 px-1 gap-2">
-              <p className="font-display font-bold text-lg">التصنيفات</p>
+              <p className="font-display font-bold text-base">التصنيفات</p>
               <button
                 onClick={() => openAddCategoryModal(null)}
-                className="text-base font-bold text-primary border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors px-3.5 py-1.5 rounded-lg shrink-0"
+                className="text-sm font-bold text-primary border border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors px-3 py-1.5 rounded-lg shrink-0"
               >
                 + تصنيف رئيسي
               </button>
             </div>
             {categoryTree.length === 0 ? (
-              <p className="text-ink/40 text-base px-1">لسه مفيش تصنيفات.</p>
+              <p className="text-ink/40 text-sm px-1">لسه مفيش تصنيفات.</p>
             ) : (
               <div className="space-y-1">{categoryTree.map((node) => renderCategoryNode(node, 0))}</div>
             )}
           </div>
 
-          <div className="rounded-2xl border-2 border-ink/10 bg-surface p-6 min-h-[300px] min-w-0">
+          <div className="rounded-xl border border-ink/10 bg-surface p-6 min-h-[300px] min-w-0">
             {trimmedSearch.length >= 2 ? (
               searching && !searchResults ? (
                 <p className="text-ink/40 text-lg">جاري البحث...</p>
@@ -1200,23 +1202,23 @@ export default function QuestionBankManager() {
             ) : (
               <>
                 <div className="flex flex-wrap items-center justify-between mb-5 gap-3">
-                  <h2 className="font-display font-bold text-xl w-full sm:w-auto break-words">{selectedCategory.title}</h2>
-                  <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                  <h2 className="font-display font-bold text-lg w-full sm:w-auto break-words">{selectedCategory.title}</h2>
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => setImportModalOpen(true)}
-                      className="px-5 py-3 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors"
+                      className="px-4 py-2.5 rounded-lg border border-primary/20 text-primary font-display font-bold text-sm hover:bg-primary/5 transition-colors"
                     >
                       استيراد من CSV
                     </button>
                     <button
                       onClick={openAddPassageModal}
-                      className="px-5 py-3 rounded-full border-2 border-primary/20 text-primary font-display font-bold text-base hover:bg-primary/5 transition-colors"
+                      className="px-4 py-2.5 rounded-lg border border-primary/20 text-primary font-display font-bold text-sm hover:bg-primary/5 transition-colors"
                     >
                       + نص قراءة
                     </button>
                     <button
                       onClick={() => openAddQuestionModal()}
-                      className="px-5 py-3 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors"
+                      className="px-4 py-2.5 rounded-lg bg-primary text-white font-display font-bold text-sm hover:bg-pink transition-colors"
                     >
                       + سؤال جديد
                     </button>
@@ -1310,7 +1312,13 @@ export default function QuestionBankManager() {
         onClose={closeDeletePassageModal}
       />
 
-      <ImportQuestionsModal open={importModalOpen} onClose={() => setImportModalOpen(false)} onConfirm={handleImportQuestions} />
+      <ImportQuestionsModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onConfirm={handleImportQuestions}
+        categories={flattenedCategories}
+        defaultCategoryId={selectedCategoryId}
+      />
       {exportModal && (
         <ExportQuestionsModal
           open={!!exportModal}

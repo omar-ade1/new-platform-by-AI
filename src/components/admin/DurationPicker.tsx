@@ -9,7 +9,7 @@ export default function DurationPicker({ value, onChange }: { value: DurationVal
       <select
         value={value.preset}
         onChange={(e) => onChange({ ...value, preset: e.target.value })}
-        className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors bg-surface"
+        className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors bg-surface"
       >
         {DURATION_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
@@ -27,7 +27,7 @@ export default function DurationPicker({ value, onChange }: { value: DurationVal
               min={0}
               value={value.days}
               onChange={(e) => onChange({ ...value, days: Math.max(0, Number(e.target.value) || 0) })}
-              className="w-full rounded-xl border-2 border-ink/10 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
+              className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
             />
           </div>
           <div>
@@ -38,7 +38,7 @@ export default function DurationPicker({ value, onChange }: { value: DurationVal
               max={23}
               value={value.hours}
               onChange={(e) => onChange({ ...value, hours: Math.min(23, Math.max(0, Number(e.target.value) || 0)) })}
-              className="w-full rounded-xl border-2 border-ink/10 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
+              className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
             />
           </div>
           <div>
@@ -49,7 +49,7 @@ export default function DurationPicker({ value, onChange }: { value: DurationVal
               max={59}
               value={value.minutes}
               onChange={(e) => onChange({ ...value, minutes: Math.min(59, Math.max(0, Number(e.target.value) || 0)) })}
-              className="w-full rounded-xl border-2 border-ink/10 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
+              className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors"
             />
           </div>
         </div>

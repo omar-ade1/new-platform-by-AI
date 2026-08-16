@@ -52,9 +52,9 @@ export default function TestQuickAddQuestionModal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface rounded-2xl p-8 w-full max-w-lg max-h-[85vh] overflow-y-auto"
+            className="bg-surface rounded-xl p-7 w-full max-w-lg max-h-[85vh] overflow-y-auto"
           >
-            <h2 className="font-display font-black text-2xl text-primary mb-2">سؤال جديد</h2>
+            <h2 className="font-display font-bold text-xl text-primary mb-2">سؤال جديد</h2>
             <p className="text-ink/50 text-base mb-6">هيتضاف لبنك الأسئلة ولاختبار ده على طول.</p>
 
             <form onSubmit={onSave} className="space-y-5">
@@ -65,7 +65,7 @@ export default function TestQuickAddQuestionModal({
                   rows={2}
                   value={text}
                   onChange={(e) => onTextChange(e.target.value)}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors resize-none"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors resize-none"
                 />
               </div>
 
@@ -120,7 +120,7 @@ export default function TestQuickAddQuestionModal({
                 <select
                   value={categoryId}
                   onChange={(e) => onCategoryIdChange(e.target.value)}
-                  className="w-full rounded-2xl border-2 border-ink/10 px-5 py-3.5 text-base focus:border-primary outline-none transition-colors bg-surface"
+                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors bg-surface"
                 >
                   <option value="">بدون تصنيف محدد (هيتحط في &quot;{DEFAULT_CATEGORY_TITLE}&quot;)</option>
                   {flattenedCategories.map((c) => (
@@ -136,14 +136,14 @@ export default function TestQuickAddQuestionModal({
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex-1 py-3.5 rounded-full bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
+                  className="flex-1 py-3 rounded-lg bg-primary text-white font-display font-bold text-base hover:bg-pink transition-colors disabled:opacity-60"
                 >
                   {creating ? "جاري الإضافة..." : "أضف السؤال للاختبار"}
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-7 py-3.5 rounded-full border-2 border-ink/10 font-bold text-base hover:bg-ink/5 transition-colors"
+                  className="px-6 py-3 rounded-lg border border-ink/15 font-bold text-base hover:bg-ink/5 transition-colors"
                 >
                   إلغاء
                 </button>
