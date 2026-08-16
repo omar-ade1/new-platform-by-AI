@@ -1,16 +1,8 @@
 import type { ParsedQuestionRow } from "./questionsCsv";
 import { MEMO_THEMES, type MemoOptions } from "./questionMemoDocx";
+import { escapeHtml, toSafeQuestionHtml } from "./questionTextHtml";
 
 const TEACHER_NAME = "الأستاذ عادل فؤاد عاشور";
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 function optionsInlineHtml(row: ParsedQuestionRow, showAnswers: boolean): string {
   const cells = row.options
@@ -42,7 +34,7 @@ export function buildQuestionMemoHtml(rows: ParsedQuestionRow[], options: MemoOp
     .map(
       (row, index) => `
         <div class="question-card">
-          <div class="question-text"><span class="num">${index + 1}) </span>${escapeHtml(row.question_text)}</div>
+          <div class="question-text"><span class="num">${index + 1}) </span>${toSafeQuestionHtml(row.question_text)}</div>
           ${optionsInline ? optionsInlineHtml(row, options.showAnswers) : optionsStackedHtml(row, options.showAnswers)}
         </div>`
     )

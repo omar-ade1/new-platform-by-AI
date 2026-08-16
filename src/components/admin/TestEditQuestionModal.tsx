@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import RichQuestionTextEditor from "@/components/admin/RichQuestionTextEditor";
 import type { Passage, Question } from "@/components/admin/TestQuestionsManager";
 
 export default function TestEditQuestionModal({
@@ -46,13 +47,7 @@ export default function TestEditQuestionModal({
             <form onSubmit={onSave} className="space-y-5">
               <div>
                 <label className="block font-bold text-base mb-2">نص السؤال *</label>
-                <textarea
-                  required
-                  rows={3}
-                  value={text}
-                  onChange={(e) => onTextChange(e.target.value)}
-                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors resize-none"
-                />
+                <RichQuestionTextEditor value={text} onChange={onTextChange} />
               </div>
 
               {passages.length > 0 && (

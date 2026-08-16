@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import RichQuestionTextEditor from "@/components/admin/RichQuestionTextEditor";
 import { DEFAULT_CATEGORY_TITLE } from "@/lib/supabase/questionBank";
 
 export default function TestQuickAddQuestionModal({
@@ -60,13 +61,7 @@ export default function TestQuickAddQuestionModal({
             <form onSubmit={onSave} className="space-y-5">
               <div>
                 <label className="block font-bold text-base mb-2">نص السؤال *</label>
-                <textarea
-                  required
-                  rows={2}
-                  value={text}
-                  onChange={(e) => onTextChange(e.target.value)}
-                  className="w-full rounded-lg border border-ink/15 px-4 py-3 text-base focus:border-primary outline-none transition-colors resize-none"
-                />
+                <RichQuestionTextEditor value={text} onChange={onTextChange} />
               </div>
 
               <div>

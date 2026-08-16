@@ -11,8 +11,10 @@ import QuestionBankQuestionModal from "@/components/admin/QuestionBankQuestionMo
 import QuestionBankDeleteQuestionModal from "@/components/admin/QuestionBankDeleteQuestionModal";
 import QuestionBankPassageModal from "@/components/admin/QuestionBankPassageModal";
 import QuestionBankDeletePassageModal from "@/components/admin/QuestionBankDeletePassageModal";
+import FormattedQuestionText from "@/components/shared/FormattedQuestionText";
 import Pagination from "@/components/shared/Pagination";
 import type { ParsedQuestionRow } from "@/lib/questionsCsv";
+import { prepareQuestionTextForSave } from "@/lib/questionTextHtml";
 import { buildCategoryTree, collectDescendantIds, flattenCategoryTree, type CategoryNode, type QuestionCategory } from "@/lib/supabase/questionBank";
 import { fetchQuestionsByCategoryIds } from "@/lib/supabase/questionExport";
 import { supabase } from "@/lib/supabase/client";
@@ -450,16 +452,21 @@ export default function QuestionBankManager() {
 
   async function handleSaveQuestion(e: React.FormEvent) {
     e.preventDefault();
-    if (!questionModal || !questionText.trim() || !selectedCategoryId) return;
+    if (!questionModal || !selectedCategoryId) return;
+    if (!questionText.trim()) {
+      toast.error("لازم تكتب نص السؤال");
+      return;
+    }
 
     setSavingQuestion(true);
     const passageId = questionPassageId || null;
+    const safeText = await prepareQuestionTextForSave(questionText.trim());
 
     if (questionModal.mode === "add") {
       const orderIndex = await nextOrderIndexOnServer("questions", "category_id", selectedCategoryId);
       const { data, error } = await supabase
         .from("questions")
-        .insert({ question_text: questionText.trim(), category_id: selectedCategoryId, order_index: orderIndex, passage_id: passageId })
+        .insert({ question_text: safeText, category_id: selectedCategoryId, order_index: orderIndex, passage_id: passageId })
         .select()
         .single();
 
@@ -476,7 +483,7 @@ export default function QuestionBankManager() {
     } else {
       const { data, error } = await supabase
         .from("questions")
-        .update({ question_text: questionText.trim(), passage_id: passageId })
+        .update({ question_text: safeText, passage_id: passageId })
         .eq("id", questionModal.question!.id)
         .select()
         .single();
@@ -526,11 +533,13 @@ export default function QuestionBankManager() {
   // (كل اختياراتها is_correct: false) — هتظهر كده لحد ما الأدمن يراجعها ويحدد الصح.
   async function handleImportQuestions(rows: ParsedQuestionRow[], categoryId: string) {
     const orderStart = await nextOrderIndexOnServer("questions", "category_id", categoryId);
-    const questionRows = rows.map((r, i) => ({
-      question_text: r.question_text,
-      category_id: categoryId,
-      order_index: orderStart + i,
-    }));
+    const questionRows = await Promise.all(
+      rows.map(async (r, i) => ({
+        question_text: await prepareQuestionTextForSave(r.question_text),
+        category_id: categoryId,
+        order_index: orderStart + i,
+      }))
+    );
 
     const { data: inserted, error } = await supabase.from("questions").insert(questionRows).select();
     if (error || !inserted) {
@@ -907,7 +916,7 @@ export default function QuestionBankManager() {
               {index + 1}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-base font-bold break-words">{question.question_text}</p>
+              <FormattedQuestionText html={question.question_text} className="text-base font-bold break-words" />
               <p className="text-sm text-ink/40">{questionOptions.length} اختيار</p>
             </div>
           </button>
@@ -1183,7 +1192,7 @@ export default function QuestionBankManager() {
                             onClick={() => jumpToCategory(q.category_id)}
                             className="w-full text-right rounded-2xl border-2 border-ink/10 px-4 py-3.5 hover:border-primary/40 transition-colors"
                           >
-                            <p className="text-base font-bold break-words">{q.question_text}</p>
+                            <FormattedQuestionText html={q.question_text} className="text-base font-bold break-words" />
                             <p className="text-sm text-ink/40 break-words">{categoryPath(q.category_id)}</p>
                           </button>
                         ))}

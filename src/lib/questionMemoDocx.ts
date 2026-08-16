@@ -14,6 +14,8 @@ import {
   WidthType,
   type IParagraphOptions,
 } from "docx";
+import { FONT } from "./docxFont";
+import { htmlToDocxRuns } from "./htmlToDocxRuns";
 import type { ParsedQuestionRow } from "./questionsCsv";
 
 const TEACHER_NAME = "الأستاذ عادل فؤاد عاشور";
@@ -89,13 +91,10 @@ export const MEMO_THEMES: MemoTheme[] = [
   },
 ];
 
-// أي رن نص عربي لازم rightToLeft صريح (وإلا Word بيلخبط ترتيب الأرقام/الكلمات المختلطة)،
-// وfont كـ object (مش string) عشان نضبط خط الـ complex-script (cs) بتاع العربي، مش بس اللاتيني.
-// ملحوظة: خط Changa ExtraBold ده مش مثبّت افتراضيًا على كل جهاز ويندوز — لو مش مثبّت عند اللي
-// هيفتح الملف، Word هيستبدله بخط تاني تلقائي من غير تحذير.
-const FONT = { ascii: "Changa ExtraBold", hAnsi: "Changa ExtraBold", cs: "Changa ExtraBold" };
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: WHITE };
 
+// أي رن نص عربي لازم rightToLeft صريح (وإلا Word بيلخبط ترتيب الأرقام/الكلمات المختلطة)،
+// وfont كـ object (مش string) عشان نضبط خط الـ complex-script (cs) بتاع العربي، مش بس اللاتيني.
 function run(text: string, opts: { bold?: boolean; color?: string; size?: number } = {}): TextRun {
   return new TextRun({
     text,
@@ -200,7 +199,7 @@ function questionCard(theme: MemoTheme, row: ParsedQuestionRow, index: number, s
   const cardBorder = { style: BorderStyle.SINGLE, size: 4, color: theme.cardBorder };
 
   const questionParagraph = rtlParagraph(
-    [run(`${index + 1}) `, { bold: true, color: theme.primary, size: 28 }), run(row.question_text, { bold: true, size: 25 })],
+    [run(`${index + 1}) `, { bold: true, color: theme.primary, size: 28 }), ...htmlToDocxRuns(row.question_text, { bold: true, size: 25 })],
     { spacing: { after: 100 } }
   );
 

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { toast } from "sonner";
+import FormattedQuestionText from "@/components/shared/FormattedQuestionText";
 import QuestionReviewCard, { type ReviewQuestion } from "@/components/shared/QuestionReviewCard";
 import { supabase } from "@/lib/supabase/client";
 
@@ -175,7 +176,7 @@ export default function TestRunner({
                   <span className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
                     {index + 1}
                   </span>
-                  <p className="flex-1 text-base font-bold leading-relaxed">{question.question_text}</p>
+                  <FormattedQuestionText html={question.question_text} className="flex-1 text-base font-bold leading-relaxed" />
                 </div>
                 <div className="space-y-2">
                   {question.options.map((option, optIndex) => {

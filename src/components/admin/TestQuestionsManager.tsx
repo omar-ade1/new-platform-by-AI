@@ -7,9 +7,11 @@ import ExportQuestionsModal from "@/components/admin/ExportQuestionsModal";
 import TestEditQuestionModal from "@/components/admin/TestEditQuestionModal";
 import TestQuickAddQuestionModal from "@/components/admin/TestQuickAddQuestionModal";
 import TestRandomBuilderModal from "@/components/admin/TestRandomBuilderModal";
+import FormattedQuestionText from "@/components/shared/FormattedQuestionText";
 import Pagination from "@/components/shared/Pagination";
 import type { ExportQuestion } from "@/lib/questionExportMap";
 import type { ParsedQuestionRow } from "@/lib/questionsCsv";
+import { prepareQuestionTextForSave } from "@/lib/questionTextHtml";
 import {
   buildCategoryTree,
   collectDescendantIds,
@@ -453,12 +455,17 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
 
   async function handleSaveQuestionEdit(e: React.FormEvent) {
     e.preventDefault();
-    if (!editQuestionModal || !editQuestionText.trim()) return;
+    if (!editQuestionModal) return;
+    if (!editQuestionText.trim()) {
+      toast.error("لازم تكتب نص السؤال");
+      return;
+    }
 
     setSavingQuestionEdit(true);
+    const safeText = await prepareQuestionTextForSave(editQuestionText.trim());
     const { data, error } = await supabase
       .from("questions")
-      .update({ question_text: editQuestionText.trim(), passage_id: editQuestionPassageId || null })
+      .update({ question_text: safeText, passage_id: editQuestionPassageId || null })
       .eq("id", editQuestionModal.id)
       .select()
       .single();
@@ -533,9 +540,10 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
     }
 
     const orderIndex = await nextOrderIndexOnServer("questions", "category_id", categoryId);
+    const safeText = await prepareQuestionTextForSave(quickQuestionText.trim());
     const { data: newQuestion, error: qError } = await supabase
       .from("questions")
-      .insert({ question_text: quickQuestionText.trim(), category_id: categoryId, order_index: orderIndex })
+      .insert({ question_text: safeText, category_id: categoryId, order_index: orderIndex })
       .select()
       .single();
 
@@ -587,11 +595,13 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
   // للاختبار ده على طول. أسئلة من غير إجابة صح بتتضاف "غير محلولة" (كل اختياراتها is_correct: false).
   async function handleImportQuestions(rows: ParsedQuestionRow[], categoryId: string) {
     const orderStart = await nextOrderIndexOnServer("questions", "category_id", categoryId);
-    const questionRows = rows.map((r, i) => ({
-      question_text: r.question_text,
-      category_id: categoryId,
-      order_index: orderStart + i,
-    }));
+    const questionRows = await Promise.all(
+      rows.map(async (r, i) => ({
+        question_text: await prepareQuestionTextForSave(r.question_text),
+        category_id: categoryId,
+        order_index: orderStart + i,
+      }))
+    );
 
     const { data: insertedQuestions, error } = await supabase.from("questions").insert(questionRows).select();
     if (error || !insertedQuestions) {
@@ -938,7 +948,7 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
                       <span className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
                         {index + 1}
                       </span>
-                      <p className="flex-1 min-w-0 text-base font-bold break-words">{question?.question_text || "سؤال محذوف"}</p>
+                      <FormattedQuestionText html={question?.question_text || "سؤال محذوف"} className="flex-1 min-w-0 text-base font-bold break-words" />
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
@@ -1020,7 +1030,7 @@ export default function TestQuestionsManager({ testId, testTitle }: { testId: st
                       <div key={question.id} className={`rounded-2xl border-2 overflow-hidden ${solved ? "border-ink/10" : "border-yellow/50"}`}>
                         <div className={`flex flex-wrap items-center gap-3 px-4 py-3.5 ${solved ? "" : "bg-yellow/[0.07]"}`}>
                           <div className="w-full sm:w-auto sm:flex-1 min-w-0 flex items-center gap-3">
-                            <p className="flex-1 min-w-0 text-base font-bold break-words">{question.question_text}</p>
+                            <FormattedQuestionText html={question.question_text} className="flex-1 min-w-0 text-base font-bold break-words" />
                           </div>
                           <button
                             onClick={() => openEditQuestionModal(question)}

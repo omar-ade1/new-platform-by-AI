@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import type { Question } from "@/components/admin/TestQuestionsManager";
+import FormattedQuestionText from "@/components/shared/FormattedQuestionText";
 
 export default function TestRandomBuilderModal({
   open,
@@ -122,7 +123,7 @@ export default function TestRandomBuilderModal({
                 <div className="max-h-72 overflow-y-auto space-y-2 mb-6">
                   {preview.map((q) => (
                     <div key={q.id} className="rounded-xl border-2 border-ink/10 px-4 py-3 text-base flex items-center gap-3">
-                      <p className="flex-1 min-w-0 break-words">{q.question_text}</p>
+                      <FormattedQuestionText html={q.question_text} className="flex-1 min-w-0 break-words" />
                       {q.passage_id && <span className="shrink-0 text-sm font-bold text-primary bg-primary/10 rounded-full px-3 py-1">من نص</span>}
                     </div>
                   ))}

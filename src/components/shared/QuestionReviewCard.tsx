@@ -1,3 +1,5 @@
+import FormattedQuestionText from "@/components/shared/FormattedQuestionText";
+
 const optionLetters = ["أ", "ب", "ج", "د", "هـ", "و", "ز", "ح"];
 
 export type ReviewPassage = { id: string; title: string; body: string };
@@ -49,7 +51,7 @@ export default function QuestionReviewCard({
           <span className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 print:w-5 print:h-5 print:text-xs">
             {index + 1}
           </span>
-          <p className="flex-1 text-base font-bold leading-relaxed print:leading-snug">{question.question_text}</p>
+          <FormattedQuestionText html={question.question_text} className="flex-1 text-base font-bold leading-relaxed print:leading-snug" />
           {question.selected_option_id === null && (
             <span className="hidden shrink-0 print:inline text-primary font-black text-xs">⊘</span>
           )}
