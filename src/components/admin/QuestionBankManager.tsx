@@ -744,10 +744,11 @@ export default function QuestionBankManager() {
   async function setCorrectOption(question: Question, option: Option) {
     if (option.is_correct) return;
 
-    const [{ error: e1 }, { error: e2 }] = await Promise.all([
-      supabase.from("question_options").update({ is_correct: false }).eq("question_id", question.id),
-      supabase.from("question_options").update({ is_correct: true }).eq("id", option.id),
-    ]);
+    // لازم بالترتيب مش Promise.all: الاستعلامين بيلمسوا صفوف متداخلة (الأول بيمسح كل اختيارات
+    // السؤال بما فيهم الاختيار المستهدف، والتاني بيحطه صح) — لو اتنفذوا بالتوازي وترتيب وصولهم
+    // لقاعدة البيانات اتقلب، الاستعلام الأول ممكن يمسح تحديد الإجابة اللي التاني حطّه لسه.
+    const { error: e1 } = await supabase.from("question_options").update({ is_correct: false }).eq("question_id", question.id);
+    const { error: e2 } = await supabase.from("question_options").update({ is_correct: true }).eq("id", option.id);
 
     if (e1 || e2) {
       toast.error("حصل خطأ في تحديد الإجابة الصحيحة");
